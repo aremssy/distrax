@@ -1,0 +1,10 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Realty Class logo</title>
+  <desc id="desc">A circular monogram with a house silhouette.</desc>
+  <rect x="18" y="18" width="92" height="92" rx="24" fill="#F9FAFF"/>
+  <circle cx="64" cy="64" r="30" fill="#1D4ED8"/>
+  <path d="M48 66L64 51L80 66V81H48V66Z" fill="#F8FAFC"/>
+  <path d="M55 81V70H73V81" fill="#BFDBFE"/>
+  <path d="M52 65H76" stroke="#E879F9" stroke-width="4" stroke-linecap="round"/>
+  <path d="M64 54V77" stroke="#E879F9" stroke-width="4" stroke-linecap="round"/>
+</svg>

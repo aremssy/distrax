@@ -1,0 +1,3776 @@
+openapi: 3.0.3
+info:
+  title: 'Ready Booking API'
+  description: 'REST API for the Ready Booking platform — covering property listings, hotel bookings, technician marketplace, reviews, notifications, and admin operations.'
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost'
+tags:
+  -
+    name: General
+    description: ''
+components:
+  securitySchemes:
+    default:
+      type: http
+      scheme: bearer
+      description: 'Obtain a token via <code>POST /api/v1/auth/login</code>. Pass it as <code>Authorization: Bearer {token}</code>.'
+security:
+  -
+    default: []
+paths:
+  /api/v1/config/bootstrap:
+    get:
+      summary: 'GET /api/v1/config/bootstrap'
+      operationId: gETapiv1configbootstrap
+      description: "Single call that gives clients everything they need to configure themselves:\nsite info, languages, currencies, active payment gateways (no secrets),\nfeature toggles, limits, map provider public key, property types,\nand technician categories.\n\nResponse is cached for 5 minutes."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  '/api/v1/translations/{locale}':
+    get:
+      summary: 'GET /api/v1/translations/{locale}'
+      operationId: gETapiv1translationslocale
+      description: "Return all translation strings for the given locale, grouped by translation group.\nResponse: { \"auth\": { \"login\": \"Login\" }, \"common\": { \"save\": \"Save\" }, ... }"
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: locale
+        description: ''
+        example: sr_BA
+        required: true
+        schema:
+          type: string
+  /api/v1/custom-fields:
+    get:
+      summary: 'GET /api/v1/custom-fields?property_type=rent'
+      operationId: gETapiv1customFieldspropertyTyperent
+      description: "Return active custom fields for a given property type.\nUsed by listing forms to know which extra fields to render."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property_type:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - property_type
+  /api/v1/property-types:
+    get:
+      summary: 'GET /api/v1/property-types'
+      operationId: gETapiv1propertyTypes
+      description: 'Return the canonical list of property types the platform supports.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/amenities:
+    get:
+      summary: 'GET /api/v1/amenities'
+      operationId: gETapiv1amenities
+      description: "Return the list of amenity options clients can attach to a listing\nvia the utility_flags JSON field. Configurable via admin settings\n(property_amenity_options), with sensible defaults."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/auth/register/start:
+    post:
+      summary: 'POST /api/v1/auth/register/start'
+      operationId: pOSTapiv1authregisterstart
+      description: 'Send registration OTP to phone. Returns 409 if phone already registered.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  description: 'Must match the regex /^\+?[0-9]{7,20}$/. validation.max.'
+                  example: bngzmiyvdljnikhw
+                name:
+                  type: string
+                  description: validation.max.
+                  example: a
+                email:
+                  type: string
+                  description: 'validation.email validation.max.'
+                  example: breitenberg.gilbert@example.com
+                  nullable: true
+              required:
+                - phone
+  /api/v1/auth/register/verify:
+    post:
+      summary: 'POST /api/v1/auth/register/verify'
+      operationId: pOSTapiv1authregisterverify
+      description: 'Verify OTP, create user, return Sanctum token.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  description: 'Must match the regex /^\+?[0-9]{7,20}$/. validation.max.'
+                  example: bngzmiyvdljnikhw
+                otp:
+                  type: string
+                  description: validation.digits.
+                  example: '569775'
+                name:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                email:
+                  type: string
+                  description: 'validation.email validation.max.'
+                  example: ashly64@example.com
+                  nullable: true
+                password:
+                  type: string
+                  description: validation.min.
+                  example: pBNvYg
+                  nullable: true
+              required:
+                - phone
+                - otp
+                - name
+  /api/v1/auth/login:
+    post:
+      summary: 'POST /api/v1/auth/login'
+      operationId: pOSTapiv1authlogin
+      description: "Two flows:\n  1. Email + password → immediate token.\n  2. Phone only        → send OTP, return {otp_sent: true, otp: \"...\"}.\n  3. Phone + otp       → verify OTP, return token."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  description: 'Must match the regex /^\+?[0-9]{7,20}$/. validation.max.'
+                  example: bngzmiyvdljnikhw
+                otp:
+                  type: string
+                  description: validation.digits.
+                  example: '569775'
+                  nullable: true
+              required:
+                - phone
+  /api/v1/auth/social:
+    post:
+      summary: 'POST /api/v1/auth/social'
+      operationId: pOSTapiv1authsocial
+      description: "Exchange a Google/Facebook token for a Sanctum token.\nCreates an account on first sign-in."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                provider:
+                  type: string
+                  description: ''
+                  example: google
+                  enum:
+                    - google
+                    - facebook
+                token:
+                  type: string
+                  description: validation.max.
+                  example: b
+              required:
+                - provider
+                - token
+  /api/v1/auth/forgot:
+    post:
+      summary: 'POST /api/v1/auth/forgot'
+      operationId: pOSTapiv1authforgot
+      description: 'Send password reset via email (token link) or phone (OTP).'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'validation.email validation.max.'
+                  example: gbailey@example.net
+              required:
+                - email
+  /api/v1/auth/reset:
+    post:
+      summary: 'POST /api/v1/auth/reset'
+      operationId: pOSTapiv1authreset
+      description: 'Reset password via email token or phone OTP.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'This field is required when <code>phone</code> is not present. validation.email validation.max.'
+                  example: gbailey@example.net
+                  nullable: true
+                token:
+                  type: string
+                  description: 'This field is required when <code>phone</code> is not present.'
+                  example: architecto
+                  nullable: true
+                phone:
+                  type: string
+                  description: 'This field is required when <code>email</code> is not present. Must match the regex /^\+?[0-9]{7,20}$/. validation.max.'
+                  example: ngzmiyvdljnikhwa
+                  nullable: true
+                otp:
+                  type: string
+                  description: 'This field is required when <code>email</code> is not present. validation.digits.'
+                  example: '569775'
+                  nullable: true
+                password:
+                  type: string
+                  description: validation.min.
+                  example: ']|{+-0pBNvYg'
+              required:
+                - password
+  /api/v1/register/start:
+    post:
+      summary: 'POST /api/v1/auth/register/start'
+      operationId: pOSTapiv1authregisterstart
+      description: 'Send registration OTP to phone. Returns 409 if phone already registered.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  description: 'Must match the regex /^\+?[0-9]{7,20}$/. validation.max.'
+                  example: bngzmiyvdljnikhw
+                name:
+                  type: string
+                  description: validation.max.
+                  example: a
+                email:
+                  type: string
+                  description: 'validation.email validation.max.'
+                  example: breitenberg.gilbert@example.com
+                  nullable: true
+              required:
+                - phone
+  /api/v1/register/verify:
+    post:
+      summary: 'POST /api/v1/auth/register/verify'
+      operationId: pOSTapiv1authregisterverify
+      description: 'Verify OTP, create user, return Sanctum token.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  description: 'Must match the regex /^\+?[0-9]{7,20}$/. validation.max.'
+                  example: bngzmiyvdljnikhw
+                otp:
+                  type: string
+                  description: validation.digits.
+                  example: '569775'
+                name:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                email:
+                  type: string
+                  description: 'validation.email validation.max.'
+                  example: ashly64@example.com
+                  nullable: true
+                password:
+                  type: string
+                  description: validation.min.
+                  example: pBNvYg
+                  nullable: true
+              required:
+                - phone
+                - otp
+                - name
+  /api/v1/zones/countries:
+    get:
+      summary: 'GET /api/v1/zones/countries'
+      operationId: gETapiv1zonescountries
+      description: 'Shortcut for active top-level country zones. Cached for 1 day.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/zones/resolve:
+    get:
+      summary: 'GET /api/v1/zones/resolve?lat=23.77&lng=90.36&type=area&radius=50'
+      operationId: gETapiv1zonesresolvelat2377lng9036typearearadius50
+      description: "Finds the nearest active zone to the supplied coordinate.\nUses a bounding-box pre-filter then Haversine ORDER BY for accuracy.\n\nQuery parameters:\n  lat    – required, decimal\n  lng    – required, decimal\n  type   – country|state|city|area (default: area)\n  radius – bounding-box search radius in km (default: 50)"
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lat:
+                  type: number
+                  description: validation.between.
+                  example: -89
+                lng:
+                  type: number
+                  description: validation.between.
+                  example: -179
+                type:
+                  type: string
+                  description: ''
+                  example: null
+                radius:
+                  type: number
+                  description: 'validation.min validation.max.'
+                  example: 7
+              required:
+                - lat
+                - lng
+  /api/v1/zones:
+    get:
+      summary: 'GET /api/v1/zones'
+      operationId: gETapiv1zones
+      description: "Query parameters:\n  parent_id   – filter to children of a zone\n  type        – country|state|city|area\n  search      – name substring match\n  active_only – 0|1, default 1\n  mode        – flat (default, paginated) | tree (nested, cached)\n  per_page    – default 50, max 200"
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                parent_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                type:
+                  type: string
+                  description: ''
+                  example: null
+                search:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                active_only:
+                  type: boolean
+                  description: ''
+                  example: true
+                mode:
+                  type: string
+                  description: ''
+                  example: null
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 7
+  '/api/v1/zones/{id}':
+    get:
+      summary: 'GET /api/v1/zones/{zone}'
+      operationId: gETapiv1zoneszone
+      description: 'Single zone with its immediate children and parent breadcrumb.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the zone.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/zones/{zone_id}/areas':
+    get:
+      summary: 'GET /api/v1/zones/{zone}/areas'
+      operationId: gETapiv1zoneszoneareas
+      description: "All active area-type children under a given parent zone (city or state).\nCached per parent zone."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: zone_id
+        description: 'The ID of the zone.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/listings:
+    get:
+      summary: 'GET /api/v1/listings'
+      operationId: gETapiv1listings
+      description: "Paginated listing search with filters, sorting, map-bounds support,\nand facet counts in meta."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                zone_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                include_children:
+                  type: boolean
+                  description: ''
+                  example: true
+                type:
+                  type: string
+                  description: ''
+                  example: null
+                status:
+                  type: string
+                  description: ''
+                  example: null
+                min_price:
+                  type: number
+                  description: validation.min.
+                  example: 39
+                max_price:
+                  type: number
+                  description: validation.min.
+                  example: 84
+                bedrooms:
+                  type: integer
+                  description: validation.min.
+                  example: 12
+                bathrooms:
+                  type: integer
+                  description: validation.min.
+                  example: 77
+                allowed_for:
+                  type: string
+                  description: ''
+                  example: null
+                furnished:
+                  type: boolean
+                  description: ''
+                  example: true
+                parking:
+                  type: boolean
+                  description: ''
+                  example: true
+                floor:
+                  type: integer
+                  description: ''
+                  example: 16
+                advance_months:
+                  type: integer
+                  description: validation.min.
+                  example: 39
+                featured:
+                  type: boolean
+                  description: ''
+                  example: true
+                verified:
+                  type: boolean
+                  description: ''
+                  example: false
+                keyword:
+                  type: string
+                  description: validation.max.
+                  example: g
+                sort:
+                  type: string
+                  description: ''
+                  example: null
+                sw_lat:
+                  type: number
+                  description: 'This field is required when <code>sw_lng</code>, <code>ne_lat</code>, or <code>ne_lng</code> is present. validation.between.'
+                  example: -89
+                sw_lng:
+                  type: number
+                  description: 'This field is required when <code>sw_lat</code>, <code>ne_lat</code>, or <code>ne_lng</code> is present. validation.between.'
+                  example: -180
+                ne_lat:
+                  type: number
+                  description: 'This field is required when <code>sw_lat</code>, <code>sw_lng</code>, or <code>ne_lng</code> is present. validation.between.'
+                  example: -90
+                ne_lng:
+                  type: number
+                  description: 'This field is required when <code>sw_lat</code>, <code>sw_lng</code>, or <code>ne_lat</code> is present. validation.between.'
+                  example: -180
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 1
+    post:
+      summary: 'POST /api/v1/listings'
+      operationId: pOSTapiv1listings
+      description: 'Create a new listing. Enforces post-limit guard before creation.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                zone_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                type:
+                  type: string
+                  description: ''
+                  example: mess
+                  enum:
+                    - rent
+                    - sale
+                    - hotel
+                    - mess
+                    - land
+                title:
+                  type: string
+                  description: 'validation.min validation.max.'
+                  example: 'n'
+                description:
+                  type: string
+                  description: validation.max.
+                  example: 'Animi quos velit et fugiat.'
+                  nullable: true
+                language_tag:
+                  type: string
+                  description: validation.max.
+                  example: dljnik
+                price:
+                  type: number
+                  description: validation.min.
+                  example: 7
+                service_charge:
+                  type: number
+                  description: validation.min.
+                  example: 87
+                  nullable: true
+                advance_months:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 13
+                  nullable: true
+                bedrooms:
+                  type: integer
+                  description: validation.min.
+                  example: 50
+                  nullable: true
+                bathrooms:
+                  type: integer
+                  description: validation.min.
+                  example: 62
+                  nullable: true
+                floor:
+                  type: integer
+                  description: ''
+                  example: 16
+                  nullable: true
+                total_floors:
+                  type: integer
+                  description: validation.min.
+                  example: 22
+                  nullable: true
+                area_sqft:
+                  type: number
+                  description: validation.min.
+                  example: 84
+                  nullable: true
+                parking:
+                  type: boolean
+                  description: ''
+                  example: false
+                furnished:
+                  type: boolean
+                  description: ''
+                  example: false
+                allowed_for:
+                  type: string
+                  description: ''
+                  example: bachelor
+                  enum:
+                    - bachelor
+                    - family
+                    - both
+                  nullable: true
+                utility_flags:
+                  type: array
+                  description: validation.max.
+                  example:
+                    - z
+                  items:
+                    type: string
+                address:
+                  type: string
+                  description: validation.max.
+                  example: m
+                  nullable: true
+                lat:
+                  type: number
+                  description: validation.between.
+                  example: -90
+                  nullable: true
+                lng:
+                  type: number
+                  description: validation.between.
+                  example: -180
+                  nullable: true
+                custom_fields:
+                  type: array
+                  description: ''
+                  example: null
+                  items:
+                    type: string
+                    nullable: true
+              required:
+                - zone_id
+                - type
+                - title
+                - price
+  '/api/v1/listings/{id}/distance':
+    get:
+      summary: 'GET /api/v1/listings/{listing}/distance'
+      operationId: gETapiv1listingslistingdistance
+      description: 'Straight-line (Haversine) distance from the listing to a user-supplied coordinate.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lat:
+                  type: number
+                  description: validation.between.
+                  example: -89
+                lng:
+                  type: number
+                  description: validation.between.
+                  example: -179
+              required:
+                - lat
+                - lng
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the listing.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/v1/listings/{id}/share':
+    get:
+      summary: 'GET /api/v1/listings/{id}/share'
+      operationId: gETapiv1listingsidshare
+      description: "Returns a shareable deep link, web URL, WhatsApp-ready text, and\nOpenGraph meta for the given active listing."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the listing.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/v1/listings/{listing_id}/availability':
+    get:
+      summary: 'GET /api/v1/listings/{listing}/availability?from=Y-m-d&to=Y-m-d'
+      operationId: gETapiv1listingslistingavailabilityfromYMDtoYMD
+      description: "Public endpoint. Returns per-date availability and pricing for hotel listings.\nWindow is capped at 365 days to prevent large result sets."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:
+                  type: string
+                  description: 'validation.date Must be a valid date in the format <code>Y-m-d</code>.'
+                  example: '2026-07-14'
+                to:
+                  type: string
+                  description: 'validation.date Must be a valid date in the format <code>Y-m-d</code>. validation.after.'
+                  example: '2052-08-06'
+              required:
+                - from
+                - to
+    put:
+      summary: 'PUT /api/v1/listings/{listing}/availability'
+      operationId: pUTapiv1listingslistingavailability
+      description: "Owner-only. Block/unblock dates and set per-date price overrides.\n\nBody:\n  from           Y-m-d (inclusive)\n  to             Y-m-d (exclusive — same convention as bookings)\n  is_available   bool  (optional)\n  override_price int   (optional, null to clear)"
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:
+                  type: string
+                  description: 'validation.date Must be a valid date in the format <code>Y-m-d</code>.'
+                  example: '2026-07-14'
+                to:
+                  type: string
+                  description: 'validation.date Must be a valid date in the format <code>Y-m-d</code>. validation.after.'
+                  example: '2052-08-06'
+                is_available:
+                  type: boolean
+                  description: ''
+                  example: true
+                override_price:
+                  type: integer
+                  description: validation.min.
+                  example: 39
+                  nullable: true
+              required:
+                - from
+                - to
+    parameters:
+      -
+        in: path
+        name: listing_id
+        description: 'The ID of the listing.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/listings/{listing_id}/suggested-technicians':
+    get:
+      summary: 'GET /api/v1/listings/{listing}/suggested-technicians'
+      operationId: gETapiv1listingslistingsuggestedTechnicians
+      description: 'Suggest technicians for a listing based on its zone.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+    parameters:
+      -
+        in: path
+        name: listing_id
+        description: 'The ID of the listing.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/listings/{id}':
+    get:
+      summary: 'GET /api/v1/listings/{listing}'
+      operationId: gETapiv1listingslisting
+      description: 'Full listing detail. Active listings are public; owner can view any status.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    put:
+      summary: 'PUT /api/v1/listings/{listing}'
+      operationId: pUTapiv1listingslisting
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                zone_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                type:
+                  type: string
+                  description: ''
+                  example: land
+                  enum:
+                    - rent
+                    - sale
+                    - hotel
+                    - mess
+                    - land
+                title:
+                  type: string
+                  description: 'validation.min validation.max.'
+                  example: 'n'
+                description:
+                  type: string
+                  description: validation.max.
+                  example: 'Animi quos velit et fugiat.'
+                  nullable: true
+                language_tag:
+                  type: string
+                  description: validation.max.
+                  example: dljnik
+                price:
+                  type: number
+                  description: validation.min.
+                  example: 7
+                service_charge:
+                  type: number
+                  description: validation.min.
+                  example: 87
+                  nullable: true
+                advance_months:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 13
+                  nullable: true
+                bedrooms:
+                  type: integer
+                  description: validation.min.
+                  example: 50
+                  nullable: true
+                bathrooms:
+                  type: integer
+                  description: validation.min.
+                  example: 62
+                  nullable: true
+                floor:
+                  type: integer
+                  description: ''
+                  example: 16
+                  nullable: true
+                total_floors:
+                  type: integer
+                  description: validation.min.
+                  example: 22
+                  nullable: true
+                area_sqft:
+                  type: number
+                  description: validation.min.
+                  example: 84
+                  nullable: true
+                parking:
+                  type: boolean
+                  description: ''
+                  example: false
+                furnished:
+                  type: boolean
+                  description: ''
+                  example: true
+                allowed_for:
+                  type: string
+                  description: ''
+                  example: family
+                  enum:
+                    - bachelor
+                    - family
+                    - both
+                  nullable: true
+                utility_flags:
+                  type: array
+                  description: validation.max.
+                  example:
+                    - z
+                  items:
+                    type: string
+                address:
+                  type: string
+                  description: validation.max.
+                  example: m
+                  nullable: true
+                lat:
+                  type: number
+                  description: validation.between.
+                  example: -90
+                  nullable: true
+                lng:
+                  type: number
+                  description: validation.between.
+                  example: -180
+                  nullable: true
+                custom_fields:
+                  type: array
+                  description: ''
+                  example: null
+                  items:
+                    type: string
+                    nullable: true
+    delete:
+      summary: 'DELETE /api/v1/listings/{listing}'
+      operationId: dELETEapiv1listingslisting
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the listing.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/v1/technicians/suggest:
+    get:
+      summary: 'GET /api/v1/technicians/suggest?zone_id=&category_id='
+      operationId: gETapiv1technicianssuggestzoneIdcategoryId
+      description: "Suggest technicians available for a given zone using scopeAvailableForZone.\nAlso usable via GET /listings/{id}/suggested-technicians (same logic, zone derived from listing)."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                zone_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                category_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+              required:
+                - zone_id
+  /api/v1/technicians:
+    get:
+      summary: 'GET /api/v1/technicians'
+      operationId: gETapiv1technicians
+      description: 'Browse active, verified technicians. Filter by category, zone, sort by rating.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                zone_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                sort:
+                  type: string
+                  description: ''
+                  example: null
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 22
+  '/api/v1/technicians/{id}':
+    get:
+      summary: 'GET /api/v1/technicians/{technician}'
+      operationId: gETapiv1technicianstechnician
+      description: 'Full technician profile: skills, rate, area, rating, completed jobs count.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the technician.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/plans:
+    get:
+      summary: 'GET /api/v1/plans'
+      operationId: gETapiv1plans
+      description: 'List all active subscription plans ordered by sort_order.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  '/api/v1/plans/{id}':
+    get:
+      summary: 'GET /api/v1/plans/{plan}'
+      operationId: gETapiv1plansplan
+      description: 'Show a single active plan.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the plan.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/packages:
+    get:
+      summary: 'GET /api/v1/packages'
+      operationId: gETapiv1packages
+      description: 'List all active listing packages (post-quota bundles), ordered by price.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/technician-categories:
+    get:
+      summary: 'GET /api/v1/technician-categories'
+      operationId: gETapiv1technicianCategories
+      description: 'List all active categories ordered by sort_order.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/reviews:
+    get:
+      summary: 'GET /api/v1/reviews?reviewable_type=listing&reviewable_id=1'
+      operationId: gETapiv1reviewsreviewableTypelistingreviewableId1
+      description: "Paginated visible reviews for a reviewable entity.\nIncludes avg_rating, total_count, and rating_distribution summary."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reviewable_type:
+                  type: string
+                  description: ''
+                  example: architecto
+                reviewable_id:
+                  type: integer
+                  description: validation.min.
+                  example: 22
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 7
+              required:
+                - reviewable_type
+                - reviewable_id
+    post:
+      summary: 'POST /api/v1/reviews'
+      operationId: pOSTapiv1reviews
+      description: "Submit a review for a listing, technician, or user.\nGUARD: the reviewer must have a completed booking/job with that entity.\nThe unique constraint (reviewer_id, reviewable_type, reviewable_id) prevents duplicates."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reviewable_type:
+                  type: string
+                  description: ''
+                  example: technician
+                  enum:
+                    - listing
+                    - technician
+                    - user
+                reviewable_id:
+                  type: integer
+                  description: validation.min.
+                  example: 16
+                rating:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 2
+                body:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+              required:
+                - reviewable_type
+                - reviewable_id
+                - rating
+  /api/v1/compare:
+    get:
+      summary: 'GET /api/v1/compare?ids=1,2,3'
+      operationId: gETapiv1compareids123
+      description: "Public endpoint. Returns listings side-by-side with key attributes\nfor rendering a comparison table on the website or app."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - ids
+    delete:
+      summary: 'DELETE /api/v1/compare'
+      operationId: dELETEapiv1compare
+      description: 'Clear the entire compare set for the authenticated user.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/auth/logout:
+    post:
+      summary: 'POST /api/v1/auth/logout'
+      operationId: pOSTapiv1authlogout
+      description: 'Revoke the current Sanctum token.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/me:
+    get:
+      summary: 'GET /api/v1/me'
+      operationId: gETapiv1me
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    delete:
+      summary: 'DELETE /api/v1/me'
+      operationId: dELETEapiv1me
+      description: "Initiates account deletion with a 30-day grace period.\nWithin the grace period the user can log in again to cancel.\nListings are soft-deleted immediately; conversations are preserved\n(the other party owns them)."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/me/photo:
+    post:
+      summary: 'POST /api/v1/me/photo'
+      operationId: pOSTapiv1mephoto
+      description: 'Replaces the current avatar. Stores in public disk under avatars/{id}/.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: 'validation.image validation.max.'
+              required:
+                - photo
+  /api/v1/me/password:
+    put:
+      summary: 'PUT /api/v1/me/password'
+      operationId: pUTapiv1mepassword
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_password:
+                  type: string
+                  description: ''
+                  example: architecto
+                password:
+                  type: string
+                  description: 'The value and <code>current_password</code> must be different. validation.min.'
+                  example: ']|{+-0pBNvYg'
+              required:
+                - current_password
+                - password
+  /api/v1/me/verification:
+    post:
+      summary: 'POST /api/v1/me/verification'
+      operationId: pOSTapiv1meverification
+      description: "Upload a NID/passport document → sets status to \"pending\".\nDocument is stored privately (never publicly accessible via URL)."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                document:
+                  type: string
+                  format: binary
+                  description: 'Must be a file. validation.max.'
+              required:
+                - document
+    get:
+      summary: 'GET /api/v1/me/verification'
+      operationId: gETapiv1meverification
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/me/notification-preferences:
+    get:
+      summary: 'GET /api/v1/me/notification-preferences'
+      operationId: gETapiv1menotificationPreferences
+      description: "Returns a nested map: { event: { channel: bool } }.\nMissing rows default to enabled (true)."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    put:
+      summary: 'PUT /api/v1/me/notification-preferences'
+      operationId: pUTapiv1menotificationPreferences
+      description: "Accepts a partial map of { event: { channel: bool } }.\nOnly provided combinations are updated; omitted ones are untouched."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chat:
+                  type: object
+                  description: ''
+                  example: null
+                  properties:
+                    email:
+                      type: boolean
+                      description: ''
+                      example: true
+                    sms:
+                      type: boolean
+                      description: ''
+                      example: true
+                    push:
+                      type: boolean
+                      description: ''
+                      example: false
+                    in_app:
+                      type: boolean
+                      description: ''
+                      example: false
+                alert:
+                  type: object
+                  description: ''
+                  example: null
+                  properties:
+                    email:
+                      type: boolean
+                      description: ''
+                      example: false
+                    sms:
+                      type: boolean
+                      description: ''
+                      example: false
+                    push:
+                      type: boolean
+                      description: ''
+                      example: true
+                    in_app:
+                      type: boolean
+                      description: ''
+                      example: true
+                booking:
+                  type: object
+                  description: ''
+                  example: null
+                  properties:
+                    email:
+                      type: boolean
+                      description: ''
+                      example: true
+                    sms:
+                      type: boolean
+                      description: ''
+                      example: false
+                    push:
+                      type: boolean
+                      description: ''
+                      example: true
+                    in_app:
+                      type: boolean
+                      description: ''
+                      example: false
+                lead:
+                  type: object
+                  description: ''
+                  example: null
+                  properties:
+                    email:
+                      type: boolean
+                      description: ''
+                      example: false
+                    sms:
+                      type: boolean
+                      description: ''
+                      example: false
+                    push:
+                      type: boolean
+                      description: ''
+                      example: true
+                    in_app:
+                      type: boolean
+                      description: ''
+                      example: true
+  /api/v1/me/export:
+    get:
+      summary: 'GET /api/v1/me/export'
+      operationId: gETapiv1meexport
+      description: "Generates a full data export for the authenticated user (GDPR Art. 20).\nDispatches a queued job and returns a signed download URL valid for 1 hour.\nOn sync queue (shared hosting), the file is ready immediately."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/me/export/download:
+    get:
+      summary: 'GET /api/v1/me/export/download?token=.'
+      operationId: gETapiv1meexportdownloadtoken
+      description: "..\n\nStreams the pre-generated export file to the client."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  '/api/v1/listings/{listing_id}/media':
+    post:
+      summary: 'POST /api/v1/listings/{listing}/media'
+      operationId: pOSTapiv1listingslistingmedia
+      description: 'Upload images and/or add video URLs to a listing.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  description: 'validation.image validation.max.'
+                  items:
+                    type: string
+                    format: binary
+                cover_index:
+                  type: integer
+                  description: validation.min.
+                  example: 27
+                videos:
+                  type: array
+                  description: validation.max.
+                  example: null
+                  items:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        description: 'This field is required when <code>videos</code> is present. Must be a valid URL. validation.max.'
+                        example: 'http://bailey.com/'
+                      source:
+                        type: string
+                        description: ''
+                        example: youtube
+                        enum:
+                          - youtube
+                          - vimeo
+                          - direct
+                        nullable: true
+                      thumbnail:
+                        type: string
+                        description: 'Must be a valid URL. validation.max.'
+                        example: m
+                        nullable: true
+    parameters:
+      -
+        in: path
+        name: listing_id
+        description: 'The ID of the listing.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/listings/{listing_id}/media/{type}/{mediaId}':
+    delete:
+      summary: 'DELETE /api/v1/listings/{listing}/media/{type}/{mediaId}'
+      operationId: dELETEapiv1listingslistingmediatypemediaId
+      description: 'Remove a single image or video from a listing.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: listing_id
+        description: 'The ID of the listing.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: type
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: mediaId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/v1/listings/{listing_id}/status':
+    patch:
+      summary: 'PATCH /api/v1/listings/{listing}/status'
+      operationId: pATCHapiv1listingslistingstatus
+      description: 'Owner marks a listing as rented, sold, or archived.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: ''
+                  example: sold
+                  enum:
+                    - rented
+                    - sold
+                    - archived
+              required:
+                - status
+    parameters:
+      -
+        in: path
+        name: listing_id
+        description: 'The ID of the listing.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/listings/{listing_id}/freshness-confirm':
+    post:
+      summary: 'POST /api/v1/listings/{listing}/freshness-confirm'
+      operationId: pOSTapiv1listingslistingfreshnessConfirm
+      description: 'Owner confirms the listing is still accurate and available.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: listing_id
+        description: 'The ID of the listing.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/favorites:
+    get:
+      summary: 'GET /api/v1/favorites'
+      operationId: gETapiv1favorites
+      description: "Paginated list of the authenticated user's favorited listings."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 1
+  '/api/v1/favorites/{listing_id}':
+    post:
+      summary: 'POST /api/v1/favorites/{listing}'
+      operationId: pOSTapiv1favoriteslisting
+      description: 'Add a listing to favorites. Returns 409 if already favorited.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    delete:
+      summary: 'DELETE /api/v1/favorites/{listing}'
+      operationId: dELETEapiv1favoriteslisting
+      description: 'Remove a listing from favorites.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: listing_id
+        description: 'The ID of the listing.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/saved-searches:
+    get:
+      summary: 'GET /api/v1/saved-searches'
+      operationId: gETapiv1savedSearches
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    post:
+      summary: 'POST /api/v1/saved-searches'
+      operationId: pOSTapiv1savedSearches
+      description: "Stores the supplied filter criteria as a saved search.\nUp to 20 saved searches per user."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: validation.max.
+                  example: b
+                  nullable: true
+                alert_on:
+                  type: boolean
+                  description: ''
+                  example: false
+                criteria:
+                  type: object
+                  description: ''
+                  example: []
+                  properties:
+                    zone_id:
+                      type: integer
+                      description: 'Must match an existing stored value.'
+                      example: 16
+                    include_children:
+                      type: boolean
+                      description: ''
+                      example: true
+                    type:
+                      type: string
+                      description: ''
+                      example: mess
+                      enum:
+                        - rent
+                        - sale
+                        - hotel
+                        - mess
+                        - land
+                    min_price:
+                      type: number
+                      description: validation.min.
+                      example: 39
+                    max_price:
+                      type: number
+                      description: validation.min.
+                      example: 84
+                    bedrooms:
+                      type: integer
+                      description: validation.min.
+                      example: 12
+                    bathrooms:
+                      type: integer
+                      description: validation.min.
+                      example: 77
+                    allowed_for:
+                      type: string
+                      description: ''
+                      example: bachelor
+                      enum:
+                        - bachelor
+                        - family
+                        - both
+                    furnished:
+                      type: boolean
+                      description: ''
+                      example: true
+                    parking:
+                      type: boolean
+                      description: ''
+                      example: false
+                    advance_months:
+                      type: integer
+                      description: 'validation.min validation.max.'
+                      example: 5
+                    keyword:
+                      type: string
+                      description: validation.max.
+                      example: 'y'
+              required:
+                - criteria
+  '/api/v1/saved-searches/{savedSearch_id}':
+    put:
+      summary: 'PUT /api/v1/saved-searches/{savedSearch}'
+      operationId: pUTapiv1savedSearchessavedSearch
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: validation.max.
+                  example: b
+                  nullable: true
+                alert_on:
+                  type: boolean
+                  description: ''
+                  example: true
+                criteria:
+                  type: object
+                  description: ''
+                  example: null
+                  properties:
+                    zone_id:
+                      type: integer
+                      description: 'Must match an existing stored value.'
+                      example: 16
+                    include_children:
+                      type: boolean
+                      description: ''
+                      example: true
+                    type:
+                      type: string
+                      description: ''
+                      example: mess
+                      enum:
+                        - rent
+                        - sale
+                        - hotel
+                        - mess
+                        - land
+                    min_price:
+                      type: number
+                      description: validation.min.
+                      example: 39
+                    max_price:
+                      type: number
+                      description: validation.min.
+                      example: 84
+                    bedrooms:
+                      type: integer
+                      description: validation.min.
+                      example: 12
+                    bathrooms:
+                      type: integer
+                      description: validation.min.
+                      example: 77
+                    allowed_for:
+                      type: string
+                      description: ''
+                      example: family
+                      enum:
+                        - bachelor
+                        - family
+                        - both
+                    furnished:
+                      type: boolean
+                      description: ''
+                      example: true
+                    parking:
+                      type: boolean
+                      description: ''
+                      example: false
+                    advance_months:
+                      type: integer
+                      description: 'validation.min validation.max.'
+                      example: 5
+                    keyword:
+                      type: string
+                      description: validation.max.
+                      example: 'y'
+    delete:
+      summary: 'DELETE /api/v1/saved-searches/{savedSearch}'
+      operationId: dELETEapiv1savedSearchessavedSearch
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: savedSearch_id
+        description: 'The ID of the savedSearch.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/compare/my:
+    get:
+      summary: 'GET /api/v1/compare/my'
+      operationId: gETapiv1comparemy
+      description: "Returns the authenticated user's persisted compare set."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  '/api/v1/compare/{listing_id}':
+    post:
+      summary: 'POST /api/v1/compare/{listing}'
+      operationId: pOSTapiv1comparelisting
+      description: "Add a listing to the authenticated user's compare set (max 5)."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    delete:
+      summary: 'DELETE /api/v1/compare/{listing}'
+      operationId: dELETEapiv1comparelisting
+      description: "Remove a single listing from the authenticated user's compare set."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: listing_id
+        description: 'The ID of the listing.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/conversations:
+    get:
+      summary: 'GET /api/v1/conversations'
+      operationId: gETapiv1conversations
+      description: "All conversations for the authenticated user (as starter or recipient),\nordered by latest activity. Includes per-conversation unread counts."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    post:
+      summary: 'POST /api/v1/conversations'
+      operationId: pOSTapiv1conversations
+      description: "Start a conversation about a listing. Returns the existing conversation\nif one already exists between this pair for this listing.\nThe opening message is sent in the same request."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                listing_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                message:
+                  type: string
+                  description: 'validation.min validation.max.'
+                  example: 'n'
+              required:
+                - listing_id
+                - message
+  '/api/v1/conversations/{conversation_id}/messages':
+    get:
+      summary: 'GET /api/v1/conversations/{conversation}/messages'
+      operationId: gETapiv1conversationsconversationmessages
+      description: "Paginated messages (newest first). Marks all incoming unread messages\nas read as a side effect of loading."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 1
+    post:
+      summary: 'POST /api/v1/conversations/{conversation}/messages'
+      operationId: pOSTapiv1conversationsconversationmessages
+      description: 'Send a message. Broadcasts to the private channel immediately.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: 'validation.min validation.max.'
+                  example: b
+              required:
+                - message
+    parameters:
+      -
+        in: path
+        name: conversation_id
+        description: 'The ID of the conversation.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/conversations/{conversation_id}/read':
+    post:
+      summary: 'POST /api/v1/conversations/{conversation}/read'
+      operationId: pOSTapiv1conversationsconversationread
+      description: 'Explicitly mark all incoming messages as read (useful for cross-device sync).'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: conversation_id
+        description: 'The ID of the conversation.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/listings/{listing_id}/reveal-contact':
+    post:
+      summary: 'POST /api/v1/listings/{listing}/reveal-contact'
+      operationId: pOSTapiv1listingslistingrevealContact
+      description: "Returns the listing owner's phone number, subject to:\n  - owner's phone_visibility setting (403 if 'none')\n  - per-user monthly reveal quota (429 when exhausted)\n  - idempotent: revealing the same listing again in the same period is free"
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: listing_id
+        description: 'The ID of the listing.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/owner/leads:
+    get:
+      summary: 'GET /api/v1/owner/leads'
+      operationId: gETapiv1ownerleads
+      description: "A unified, listing-filterable feed of visit requests, contact reveals,\nand inbound conversations across the authenticated owner's listings."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property_listing_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 22
+  /api/v1/owner/leads/summary:
+    get:
+      summary: 'GET /api/v1/owner/leads/summary'
+      operationId: gETapiv1ownerleadssummary
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property_listing_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+  '/api/v1/listings/{listing_id}/visits':
+    post:
+      summary: 'POST /api/v1/listings/{listing}/visits'
+      operationId: pOSTapiv1listingslistingvisits
+      description: 'Request a visit for a listing.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                scheduled_at:
+                  type: string
+                  description: 'validation.date validation.after.'
+                  example: '2052-08-06'
+                note:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+              required:
+                - scheduled_at
+    parameters:
+      -
+        in: path
+        name: listing_id
+        description: 'The ID of the listing.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/visits:
+    get:
+      summary: 'GET /api/v1/visits'
+      operationId: gETapiv1visits
+      description: "List visits for the authenticated user.\nRequesters see visits they made; listing owners see incoming requests."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  description: ''
+                  example: null
+                status:
+                  type: string
+                  description: ''
+                  example: null
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 1
+  '/api/v1/visits/{id}':
+    patch:
+      summary: 'PATCH /api/v1/visits/{visit}'
+      operationId: pATCHapiv1visitsvisit
+      description: "Confirm or cancel a visit.\n  - Requester: can cancel their own pending visit.\n  - Listing owner: can confirm or cancel any pending visit."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: ''
+                  example: confirmed
+                  enum:
+                    - confirmed
+                    - cancelled
+                note:
+                  type: string
+                  description: validation.max.
+                  example: b
+                  nullable: true
+              required:
+                - status
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the visit.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/block:
+    get:
+      summary: 'GET /api/v1/blocks'
+      operationId: gETapiv1blocks
+      description: 'List users the authenticated user has blocked.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  '/api/v1/block/{user_id}':
+    post:
+      summary: 'POST /api/v1/block/{user}'
+      operationId: pOSTapiv1blockuser
+      description: 'Block a user. Idempotent — silently returns 200 if already blocked.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    delete:
+      summary: 'DELETE /api/v1/block/{user}'
+      operationId: dELETEapiv1blockuser
+      description: 'Unblock a user.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: user_id
+        description: 'The ID of the user.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/reports:
+    post:
+      summary: 'POST /api/v1/reports'
+      operationId: pOSTapiv1reports
+      description: "Submit a report for a user, listing, or review.\nOne report per reporter per entity (subsequent submissions update the reason/details)."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reportable_type:
+                  type: string
+                  description: ''
+                  example: listing
+                  enum:
+                    - user
+                    - listing
+                    - review
+                reportable_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                reason:
+                  type: string
+                  description: ''
+                  example: wrong_information
+                  enum:
+                    - spam
+                    - inappropriate_content
+                    - fake_listing
+                    - scam
+                    - wrong_information
+                    - harassment
+                    - other
+                details:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+              required:
+                - reportable_type
+                - reportable_id
+                - reason
+  /api/v1/bookings:
+    get:
+      summary: 'GET /api/v1/bookings'
+      operationId: gETapiv1bookings
+      description: "List the authenticated user's bookings."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: ''
+                  example: null
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 1
+    post:
+      summary: 'POST /api/v1/bookings'
+      operationId: pOSTapiv1bookings
+      description: "Create a hotel booking.\n\nIdempotency: include X-Idempotency-Key header to make the request\nidempotent. Repeating with the same key durably returns the original\nbooking response, even after a cache flush.\n\nRace conditions: a distributed lock on (listing, check_in, check_out)\nprevents double-booking under concurrent requests."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                listing_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                check_in:
+                  type: string
+                  description: 'validation.date Must be a valid date in the format <code>Y-m-d</code>. validation.after_or_equal.'
+                  example: '2052-08-06'
+                check_out:
+                  type: string
+                  description: 'validation.date Must be a valid date in the format <code>Y-m-d</code>. validation.after.'
+                  example: '2052-08-06'
+                guests:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 12
+                special_requests:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+              required:
+                - listing_id
+                - check_in
+                - check_out
+  '/api/v1/bookings/{id}':
+    get:
+      summary: 'GET /api/v1/bookings/{booking}'
+      operationId: gETapiv1bookingsbooking
+      description: 'Show a single booking. Guest or listing owner may view.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the booking.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/bookings/{booking_id}/cancel':
+    post:
+      summary: 'POST /api/v1/bookings/{booking}/cancel'
+      operationId: pOSTapiv1bookingsbookingcancel
+      description: "Cancel a booking and compute the refund entitlement.\nThe actual refund payment is processed in Phase 10.\n\nQuery param: ?preview=1 returns refund info without cancelling."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: booking_id
+        description: 'The ID of the booking.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/technician/apply:
+    post:
+      summary: 'POST /api/v1/technician/apply'
+      operationId: pOSTapiv1technicianapply
+      description: "Submit a technician application (pending admin approval).\nA user can only have one technician profile."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                technician_category_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                zone_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                bio:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+                skills:
+                  type: array
+                  description: validation.max.
+                  example:
+                    - g
+                  items:
+                    type: string
+                available_time:
+                  type: object
+                  description: ''
+                  example: null
+                  properties: {  }
+                  nullable: true
+                experience_years:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 16
+                hourly_rate:
+                  type: integer
+                  description: validation.min.
+                  example: 77
+                  nullable: true
+              required:
+                - technician_category_id
+                - zone_id
+                - experience_years
+  /api/v1/technician/profile:
+    put:
+      summary: 'PUT /api/v1/technician/profile'
+      operationId: pUTapiv1technicianprofile
+      description: "Update the authenticated user's technician profile."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bio:
+                  type: string
+                  description: validation.max.
+                  example: b
+                  nullable: true
+                skills:
+                  type: array
+                  description: validation.max.
+                  example:
+                    - 'n'
+                  items:
+                    type: string
+                available_time:
+                  type: object
+                  description: ''
+                  example: null
+                  properties: {  }
+                  nullable: true
+                experience_years:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 7
+                hourly_rate:
+                  type: integer
+                  description: validation.min.
+                  example: 12
+                  nullable: true
+                is_available:
+                  type: boolean
+                  description: ''
+                  example: false
+                zone_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+  /api/v1/technician-bookings:
+    get:
+      summary: 'GET /api/v1/technician-bookings'
+      operationId: gETapiv1technicianBookings
+      description: "List bookings. role=customer (default) shows bookings I placed.\nrole=technician shows bookings assigned to my technician profile."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  description: ''
+                  example: null
+                status:
+                  type: string
+                  description: ''
+                  example: null
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 1
+    post:
+      summary: 'POST /api/v1/technician-bookings'
+      operationId: pOSTapiv1technicianBookings
+      description: "Book a technician. Creates booking in 'pending' status awaiting a quote."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                technician_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                description:
+                  type: string
+                  description: validation.max.
+                  example: 'Et animi quos velit et fugiat.'
+                scheduled_at:
+                  type: string
+                  description: 'validation.date validation.after.'
+                  example: '2052-08-06'
+                address:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                is_urgent:
+                  type: boolean
+                  description: ''
+                  example: false
+              required:
+                - technician_id
+                - description
+                - scheduled_at
+                - address
+  '/api/v1/technician-bookings/{technicianBooking_id}':
+    get:
+      summary: 'GET /api/v1/technician-bookings/{booking}'
+      operationId: gETapiv1technicianBookingsbooking
+      description: 'Show a single booking. Only the customer or the assigned technician may view.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: technicianBooking_id
+        description: 'The ID of the technicianBooking.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/technician-bookings/{technicianBooking_id}/quote':
+    post:
+      summary: 'POST /api/v1/technician-bookings/{booking}/quote'
+      operationId: pOSTapiv1technicianBookingsbookingquote
+      description: "Technician submits a quote. Booking must be 'pending'.\nMoves booking status to 'quoted'."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: integer
+                  description: validation.min.
+                  example: 16
+                description:
+                  type: string
+                  description: validation.max.
+                  example: 'Et animi quos velit et fugiat.'
+                  nullable: true
+                valid_until:
+                  type: string
+                  description: 'validation.date validation.after.'
+                  example: '2052-08-06'
+                  nullable: true
+              required:
+                - amount
+    parameters:
+      -
+        in: path
+        name: technicianBooking_id
+        description: 'The ID of the technicianBooking.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/technician-bookings/{technicianBooking_id}/quote/accept':
+    post:
+      summary: 'POST /api/v1/technician-bookings/{booking}/quote/accept'
+      operationId: pOSTapiv1technicianBookingsbookingquoteaccept
+      description: "Customer accepts the latest pending quote.\nBooking moves to 'accepted', agreed_amount set, other quotes rejected."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: technicianBooking_id
+        description: 'The ID of the technicianBooking.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/technician-bookings/{technicianBooking_id}/quote/reject':
+    post:
+      summary: 'POST /api/v1/technician-bookings/{booking}/quote/reject'
+      operationId: pOSTapiv1technicianBookingsbookingquotereject
+      description: "Customer rejects the latest pending quote.\nBooking reverts to 'pending' if no other pending quotes remain."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: technicianBooking_id
+        description: 'The ID of the technicianBooking.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/maintenance-requests:
+    get:
+      summary: 'GET /api/v1/maintenance-requests'
+      operationId: gETapiv1maintenanceRequests
+      description: 'List maintenance requests. role=tenant (default) or role=owner.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  description: ''
+                  example: null
+                status:
+                  type: string
+                  description: ''
+                  example: null
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 1
+    post:
+      summary: 'POST /api/v1/maintenance-requests'
+      operationId: pOSTapiv1maintenanceRequests
+      description: "Tenant submits a maintenance request for a property.\nGated behind the 'maintenance_requests' subscription feature."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property_listing_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                title:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                description:
+                  type: string
+                  description: validation.max.
+                  example: 'Animi quos velit et fugiat.'
+                priority:
+                  type: string
+                  description: ''
+                  example: urgent
+                  enum:
+                    - low
+                    - normal
+                    - high
+                    - urgent
+                technician_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                  nullable: true
+              required:
+                - property_listing_id
+                - title
+                - description
+  /api/v1/rent-management/units:
+    get:
+      summary: 'GET /api/v1/rent-management/units?property_listing_id='
+      operationId: gETapiv1rentManagementunitspropertyListingId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property_listing_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+              required:
+                - property_listing_id
+    post:
+      summary: ''
+      operationId: postApiV1RentManagementUnits
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property_listing_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                name:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                floor:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                rent_amount:
+                  type: integer
+                  description: validation.min.
+                  example: 12
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: occupied
+                  enum:
+                    - vacant
+                    - occupied
+                    - maintenance
+                notes:
+                  type: string
+                  description: validation.max.
+                  example: m
+                  nullable: true
+              required:
+                - property_listing_id
+                - name
+  '/api/v1/rent-management/units/{id}':
+    put:
+      summary: ''
+      operationId: putApiV1RentManagementUnitsId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: validation.max.
+                  example: b
+                floor:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+                rent_amount:
+                  type: integer
+                  description: validation.min.
+                  example: 84
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: occupied
+                  enum:
+                    - vacant
+                    - occupied
+                    - maintenance
+                notes:
+                  type: string
+                  description: validation.max.
+                  example: z
+                  nullable: true
+    delete:
+      summary: ''
+      operationId: deleteApiV1RentManagementUnitsId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the unit.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/v1/rent-management/tenancies:
+    get:
+      summary: 'GET /api/v1/rent-management/tenancies'
+      operationId: gETapiv1rentManagementtenancies
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: ''
+                  example: null
+                property_listing_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 22
+    post:
+      summary: ''
+      operationId: postApiV1RentManagementTenancies
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property_listing_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                unit_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                  nullable: true
+                tenant_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                  nullable: true
+                tenant_name:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+                tenant_phone:
+                  type: string
+                  description: validation.max.
+                  example: g
+                  nullable: true
+                tenant_email:
+                  type: string
+                  description: 'validation.email validation.max.'
+                  example: rowan.gulgowski@example.com
+                  nullable: true
+                rent_amount:
+                  type: integer
+                  description: validation.min.
+                  example: 42
+                deposit_amount:
+                  type: integer
+                  description: validation.min.
+                  example: 37
+                due_day_of_month:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 19
+                start_date:
+                  type: string
+                  description: validation.date.
+                  example: '2026-07-14T07:03:12'
+                end_date:
+                  type: string
+                  description: 'validation.date validation.after.'
+                  example: '2052-08-06'
+                  nullable: true
+              required:
+                - property_listing_id
+                - rent_amount
+                - start_date
+  '/api/v1/rent-management/tenancies/{id}':
+    get:
+      summary: ''
+      operationId: getApiV1RentManagementTenanciesId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    put:
+      summary: ''
+      operationId: putApiV1RentManagementTenanciesId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rent_amount:
+                  type: integer
+                  description: validation.min.
+                  example: 27
+                deposit_amount:
+                  type: integer
+                  description: validation.min.
+                  example: 39
+                due_day_of_month:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 7
+                end_date:
+                  type: string
+                  description: validation.date.
+                  example: '2026-07-14T07:03:12'
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: active
+                  enum:
+                    - active
+                    - ended
+                    - terminated
+    delete:
+      summary: ''
+      operationId: deleteApiV1RentManagementTenanciesId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the tenancy.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/v1/rent-management/rent-payments:
+    get:
+      summary: 'GET /api/v1/rent-management/rent-payments'
+      operationId: gETapiv1rentManagementrentPayments
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenancy_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                status:
+                  type: string
+                  description: ''
+                  example: null
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 22
+  '/api/v1/rent-management/rent-payments/{rentPayment_id}/mark-paid':
+    post:
+      summary: 'POST /api/v1/rent-management/rent-payments/{rentPayment}/mark-paid'
+      operationId: pOSTapiv1rentManagementrentPaymentsrentPaymentmarkPaid
+      description: "Marks a rent payment paid; issues a receipt when the 'receipts' feature is unlocked."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: rentPayment_id
+        description: 'The ID of the rentPayment.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/v1/rent-management/ledger-transactions:
+    get:
+      summary: 'GET /api/v1/rent-management/ledger-transactions'
+      operationId: gETapiv1rentManagementledgerTransactions
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: ''
+                  example: null
+                property_listing_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                from:
+                  type: string
+                  description: validation.date.
+                  example: '2026-07-14T07:03:12'
+                to:
+                  type: string
+                  description: validation.date.
+                  example: '2026-07-14T07:03:12'
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 22
+    post:
+      summary: ''
+      operationId: postApiV1RentManagementLedgerTransactions
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: ''
+                  example: expense
+                  enum:
+                    - income
+                    - expense
+                category:
+                  type: string
+                  description: validation.max.
+                  example: b
+                amount:
+                  type: integer
+                  description: validation.min.
+                  example: 22
+                occurred_on:
+                  type: string
+                  description: validation.date.
+                  example: '2026-07-14T07:03:12'
+                description:
+                  type: string
+                  description: validation.max.
+                  example: 'Animi quos velit et fugiat.'
+                  nullable: true
+                property_listing_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                  nullable: true
+                tenancy_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                  nullable: true
+              required:
+                - type
+                - category
+                - amount
+                - occurred_on
+  /api/v1/rent-management/ledger-transactions/summary:
+    get:
+      summary: 'GET /api/v1/rent-management/ledger-transactions/summary'
+      operationId: gETapiv1rentManagementledgerTransactionssummary
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:
+                  type: string
+                  description: validation.date.
+                  example: '2026-07-14T07:03:12'
+                to:
+                  type: string
+                  description: validation.date.
+                  example: '2026-07-14T07:03:12'
+  /api/v1/rent-management/agreement-templates:
+    get:
+      summary: ''
+      operationId: getApiV1RentManagementAgreementTemplates
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    post:
+      summary: ''
+      operationId: postApiV1RentManagementAgreementTemplates
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: validation.max.
+                  example: b
+                body:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                is_default:
+                  type: boolean
+                  description: ''
+                  example: true
+              required:
+                - name
+                - body
+  '/api/v1/rent-management/agreement-templates/{agreementTemplate_id}':
+    put:
+      summary: ''
+      operationId: putApiV1RentManagementAgreementTemplatesAgreementTemplate_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: validation.max.
+                  example: b
+                body:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                is_default:
+                  type: boolean
+                  description: ''
+                  example: false
+    delete:
+      summary: ''
+      operationId: deleteApiV1RentManagementAgreementTemplatesAgreementTemplate_id
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: agreementTemplate_id
+        description: 'The ID of the agreementTemplate.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/v1/rent-management/agreements:
+    get:
+      summary: ''
+      operationId: getApiV1RentManagementAgreements
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenancy_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+    post:
+      summary: 'POST /api/v1/rent-management/agreements'
+      operationId: pOSTapiv1rentManagementagreements
+      description: "Generates an agreement document from a template (or the owner's default) for a tenancy."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenancy_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                agreement_template_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                  nullable: true
+              required:
+                - tenancy_id
+  '/api/v1/rent-management/agreements/{id}':
+    get:
+      summary: ''
+      operationId: getApiV1RentManagementAgreementsId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the agreement.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/v1/subscriptions:
+    post:
+      summary: 'POST /api/v1/subscriptions'
+      operationId: pOSTapiv1subscriptions
+      description: "Subscribe to a plan.\n\npayment_method=wallet: deducts from wallet balance and activates immediately.\npayment_method=gateway (default): creates a pending subscription + pending payment\n                                  for Phase 10 gateway completion."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                payment_method:
+                  type: string
+                  description: ''
+                  example: wallet
+                  enum:
+                    - wallet
+                    - gateway
+                auto_renew:
+                  type: boolean
+                  description: ''
+                  example: false
+                coupon_code:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+              required:
+                - plan_id
+  /api/v1/me/subscription:
+    get:
+      summary: 'GET /api/v1/me/subscription'
+      operationId: gETapiv1mesubscription
+      description: "Show the authenticated user's current (or most recent) subscription."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/me/subscription/cancel:
+    post:
+      summary: 'POST /api/v1/me/subscription/cancel'
+      operationId: pOSTapiv1mesubscriptioncancel
+      description: 'Cancel the active subscription. Access ends at the original ends_at date.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/me/limits:
+    get:
+      summary: 'GET /api/v1/me/limits'
+      operationId: gETapiv1melimits
+      description: "Return the authenticated user's post-limit status and feature gate map.\nThe feature_gates object maps every known feature to a boolean, so the\nfrontend can lock/unlock UI elements without knowing the full feature list."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  '/api/v1/packages/{package_id}/buy':
+    post:
+      summary: 'POST /api/v1/packages/{package}/buy'
+      operationId: pOSTapiv1packagespackagebuy
+      description: "Purchase a listing package to add extra post quota.\n\npayment_method=wallet: deducts from wallet and creates a paid payment immediately.\npayment_method=gateway (default): creates a pending payment for Phase 10."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_method:
+                  type: string
+                  description: ''
+                  example: gateway
+                  enum:
+                    - wallet
+                    - gateway
+                coupon_code:
+                  type: string
+                  description: validation.max.
+                  example: b
+                  nullable: true
+    parameters:
+      -
+        in: path
+        name: package_id
+        description: 'The ID of the package.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/wallet:
+    get:
+      summary: 'GET /api/v1/wallet'
+      operationId: gETapiv1wallet
+      description: "Show the authenticated user's wallet balance.\nAuto-creates the wallet if this is the first access."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/wallet/transactions:
+    get:
+      summary: 'GET /api/v1/wallet/transactions'
+      operationId: gETapiv1wallettransactions
+      description: "Paginated transaction history for the authenticated user's wallet."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: ''
+                  example: credit
+                  enum:
+                    - credit
+                    - debit
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 1
+  /api/v1/wallet/topup:
+    post:
+      summary: 'POST /api/v1/wallet/topup'
+      operationId: pOSTapiv1wallettopup
+      description: "Request a wallet top-up. Creates a pending Payment record.\nPhase 10 gateway webhook will credit the wallet on payment confirmation."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: integer
+                  description: validation.min.
+                  example: 95
+                gateway:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+              required:
+                - amount
+                - gateway
+  /api/v1/coupons/apply:
+    post:
+      summary: 'POST /api/v1/coupons/apply'
+      operationId: pOSTapiv1couponsapply
+      description: "Validate a coupon code and return the discounted amount for a given purchase.\nThis endpoint does NOT consume the coupon — it only previews the discount.\nThe coupon is consumed when the payment is marked as paid (Phase 10)."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  description: validation.max.
+                  example: b
+                amount:
+                  type: integer
+                  description: validation.min.
+                  example: 22
+                context:
+                  type: string
+                  description: ''
+                  example: subscription
+                  enum:
+                    - subscription
+                    - package
+                    - technician_booking
+                    - hotel_booking
+                  nullable: true
+              required:
+                - code
+                - amount
+  '/api/v1/reviews/{review_id}/report':
+    post:
+      summary: 'POST /api/v1/reviews/{review}/report'
+      operationId: pOSTapiv1reviewsreviewreport
+      description: "Flag a review as abusive. Delegates to the existing Report system\n(reportable_type=review is already supported by StoreReportRequest).\nThis is a convenience alias so the client doesn't need the generic report endpoint."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: ''
+                  example: architecto
+                details:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+                  nullable: true
+              required:
+                - reason
+    parameters:
+      -
+        in: path
+        name: review_id
+        description: 'The ID of the review.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/notifications:
+    get:
+      summary: 'GET /api/v1/notifications'
+      operationId: gETapiv1notifications
+      description: "Paginated in-app notifications for the authenticated user.\nOptional filter: ?unread=1"
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                unread:
+                  type: boolean
+                  description: ''
+                  example: true
+                per_page:
+                  type: integer
+                  description: 'validation.min validation.max.'
+                  example: 1
+  /api/v1/notifications/unread-count:
+    get:
+      summary: 'GET /api/v1/notifications/unread-count'
+      operationId: gETapiv1notificationsunreadCount
+      description: 'Returns the number of unread in-app notifications.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  /api/v1/notifications/read-all:
+    post:
+      summary: 'POST /api/v1/notifications/read-all'
+      operationId: pOSTapiv1notificationsreadAll
+      description: 'Mark all unread notifications for the authenticated user as read.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+  '/api/v1/notifications/{notification_id}/read':
+    post:
+      summary: 'POST /api/v1/notifications/{notification}/read'
+      operationId: pOSTapiv1notificationsnotificationread
+      description: 'Mark a single notification as read.'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: notification_id
+        description: 'The ID of the notification.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/devices:
+    post:
+      summary: 'POST /api/v1/devices'
+      operationId: pOSTapiv1devices
+      description: "Register or update a device token for push notifications.\nIf the same token is already registered to another account it is\nre-associated with the current user (device was handed over / re-logged in)."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: validation.max.
+                  example: b
+                platform:
+                  type: string
+                  description: ''
+                  example: android
+                  enum:
+                    - android
+                    - ios
+                    - web
+                name:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+              required:
+                - token
+                - platform
+  '/api/v1/devices/{id}':
+    delete:
+      summary: 'DELETE /api/v1/devices/{device}'
+      operationId: dELETEapiv1devicesdevice
+      description: 'Unregister a device token (e.g. on logout).'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the device.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/payments/{id}':
+    get:
+      summary: 'GET /api/v1/payments/{payment}'
+      operationId: gETapiv1paymentspayment
+      description: 'Return the current status of a payment (owner only).'
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the payment.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/payments/{payment_id}/initiate':
+    post:
+      summary: 'POST /api/v1/payments/{payment}/initiate'
+      operationId: pOSTapiv1paymentspaymentinitiate
+      description: "Initiate a pending payment through the chosen gateway.\nIdempotency: repeat calls with the same X-Idempotency-Key return the cached response."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gateway:
+                  type: string
+                  description: ''
+                  example: razorpay
+                  enum:
+                    - stripe
+                    - paypal
+                    - bkash
+                    - razorpay
+                    - paystack
+              required:
+                - gateway
+    parameters:
+      -
+        in: path
+        name: payment_id
+        description: 'The ID of the payment.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/payments/{payment_id}/refund':
+    post:
+      summary: 'POST /api/v1/payments/{payment}/refund'
+      operationId: pOSTapiv1paymentspaymentrefund
+      description: "Request a refund for a paid payment.\nPartial refunds are supported by passing an amount."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: integer
+                  description: validation.min.
+                  example: 16
+                reason:
+                  type: string
+                  description: validation.max.
+                  example: 'n'
+              required:
+                - reason
+    parameters:
+      -
+        in: path
+        name: payment_id
+        description: 'The ID of the payment.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/webhooks/{gateway}':
+    post:
+      summary: 'POST /api/v1/webhooks/{gateway}'
+      operationId: pOSTapiv1webhooksgateway
+      description: "Receive a server-to-server webhook from a payment gateway.\nValidates the signature, finds the matching Payment, and activates the payable."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: gateway
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/v1/payments/callback/{gateway}':
+    get:
+      summary: 'GET /api/v1/payments/callback/{gateway}'
+      operationId: gETapiv1paymentscallbackgateway
+      description: "Browser redirect callback after the user completes (or cancels) payment on the\ngateway's hosted page. Captures the order (PayPal) or executes the payment (bKash)."
+      parameters: []
+      responses: {  }
+      tags:
+        - General
+    parameters:
+      -
+        in: path
+        name: gateway
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string

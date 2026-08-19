@@ -1,0 +1,4126 @@
+{
+    "variable": [
+        {
+            "id": "baseUrl",
+            "key": "baseUrl",
+            "type": "string",
+            "name": "string",
+            "value": "http:\/\/localhost"
+        }
+    ],
+    "info": {
+        "name": "Rentdo API",
+        "_postman_id": "ebdef8d7-7a30-47eb-9472-5569903a02c0",
+        "description": "REST API for the Rentdo platform \u2014 covering property listings, hotel bookings, technician marketplace, reviews, notifications, and admin operations.",
+        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json",
+        "version": "1.0.0"
+    },
+    "item": [
+        {
+            "name": "General",
+            "description": "",
+            "item": [
+                {
+                    "name": "GET \/api\/v1\/config\/bootstrap",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/config\/bootstrap",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/config\/bootstrap"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Single call that gives clients everything they need to configure themselves:\nsite info, languages, currencies, active payment gateways (no secrets),\nfeature toggles, limits, map provider public key, property types,\nand technician categories.\n\nResponse is cached for 5 minutes."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/translations\/{locale}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/translations\/:locale",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/translations\/:locale",
+                            "variable": [
+                                {
+                                    "id": "locale",
+                                    "key": "locale",
+                                    "value": "sr_BA",
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Return all translation strings for the given locale, grouped by translation group.\nResponse: { \"auth\": { \"login\": \"Login\" }, \"common\": { \"save\": \"Save\" }, ... }"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/custom-fields?property_type=rent",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/custom-fields",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/custom-fields"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"property_type\":\"architecto\"}"
+                        },
+                        "description": "Return active custom fields for a given property type.\nUsed by listing forms to know which extra fields to render."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/property-types",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/property-types",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/property-types"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Return the canonical list of property types the platform supports."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/amenities",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/amenities",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/amenities"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Return the list of amenity options clients can attach to a listing\nvia the utility_flags JSON field. Configurable via admin settings\n(property_amenity_options), with sensible defaults."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/auth\/register\/start",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/register\/start",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/register\/start"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"phone\":\"bngzmiyvdljnikhw\",\"name\":\"a\",\"email\":\"breitenberg.gilbert@example.com\"}"
+                        },
+                        "description": "Send registration OTP to phone. Returns 409 if phone already registered."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/auth\/register\/verify",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/register\/verify",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/register\/verify"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"phone\":\"bngzmiyvdljnikhw\",\"otp\":\"569775\",\"name\":\"n\",\"email\":\"ashly64@example.com\",\"password\":\"pBNvYg\"}"
+                        },
+                        "description": "Verify OTP, create user, return Sanctum token."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/auth\/login",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/login",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/login"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"phone\":\"bngzmiyvdljnikhw\",\"otp\":\"569775\"}"
+                        },
+                        "description": "Two flows:\n  1. Email + password \u2192 immediate token.\n  2. Phone only        \u2192 send OTP, return {otp_sent: true, otp: \"...\"}.\n  3. Phone + otp       \u2192 verify OTP, return token."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/auth\/social",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/social",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/social"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"provider\":\"google\",\"token\":\"b\"}"
+                        },
+                        "description": "Exchange a Google\/Facebook token for a Sanctum token.\nCreates an account on first sign-in."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/auth\/forgot",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/forgot",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/forgot"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"gbailey@example.net\"}"
+                        },
+                        "description": "Send password reset via email (token link) or phone (OTP)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/auth\/reset",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/reset",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/reset"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"gbailey@example.net\",\"token\":\"architecto\",\"phone\":\"ngzmiyvdljnikhwa\",\"otp\":\"569775\",\"password\":\"]|{+-0pBNvYg\"}"
+                        },
+                        "description": "Reset password via email token or phone OTP."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/auth\/register\/start",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/register\/start",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/register\/start"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"phone\":\"bngzmiyvdljnikhw\",\"name\":\"a\",\"email\":\"breitenberg.gilbert@example.com\"}"
+                        },
+                        "description": "Send registration OTP to phone. Returns 409 if phone already registered."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/auth\/register\/verify",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/register\/verify",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/register\/verify"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"phone\":\"bngzmiyvdljnikhw\",\"otp\":\"569775\",\"name\":\"n\",\"email\":\"ashly64@example.com\",\"password\":\"pBNvYg\"}"
+                        },
+                        "description": "Verify OTP, create user, return Sanctum token."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/zones\/countries",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/zones\/countries",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/zones\/countries"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Shortcut for active top-level country zones. Cached for 1 day."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/zones\/resolve?lat=23.77&lng=90.36&type=area&radius=50",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/zones\/resolve",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/zones\/resolve"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"lat\":-89,\"lng\":-179,\"radius\":7}"
+                        },
+                        "description": "Finds the nearest active zone to the supplied coordinate.\nUses a bounding-box pre-filter then Haversine ORDER BY for accuracy.\n\nQuery parameters:\n  lat    \u2013 required, decimal\n  lng    \u2013 required, decimal\n  type   \u2013 country|state|city|area (default: area)\n  radius \u2013 bounding-box search radius in km (default: 50)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/zones",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/zones",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/zones"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"parent_id\":16,\"search\":\"n\",\"active_only\":true,\"per_page\":7}"
+                        },
+                        "description": "Query parameters:\n  parent_id   \u2013 filter to children of a zone\n  type        \u2013 country|state|city|area\n  search      \u2013 name substring match\n  active_only \u2013 0|1, default 1\n  mode        \u2013 flat (default, paginated) | tree (nested, cached)\n  per_page    \u2013 default 50, max 200"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/zones\/{zone}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/zones\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/zones\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the zone."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Single zone with its immediate children and parent breadcrumb."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/zones\/{zone}\/areas",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/zones\/:zone_id\/areas",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/zones\/:zone_id\/areas",
+                            "variable": [
+                                {
+                                    "id": "zone_id",
+                                    "key": "zone_id",
+                                    "value": 1,
+                                    "description": "The ID of the zone."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "All active area-type children under a given parent zone (city or state).\nCached per parent zone."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/listings",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"zone_id\":16,\"include_children\":true,\"min_price\":39,\"max_price\":84,\"bedrooms\":12,\"bathrooms\":77,\"furnished\":true,\"parking\":true,\"floor\":16,\"advance_months\":39,\"featured\":true,\"verified\":false,\"keyword\":\"g\",\"sw_lat\":-89,\"sw_lng\":-180,\"ne_lat\":-90,\"ne_lng\":-180,\"per_page\":1}"
+                        },
+                        "description": "Paginated listing search with filters, sorting, map-bounds support,\nand facet counts in meta."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/listings\/{listing}\/distance",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:id\/distance",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:id\/distance",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "architecto",
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"lat\":-89,\"lng\":-179}"
+                        },
+                        "description": "Straight-line (Haversine) distance from the listing to a user-supplied coordinate."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/listings\/{id}\/share",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:id\/share",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:id\/share",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "architecto",
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns a shareable deep link, web URL, WhatsApp-ready text, and\nOpenGraph meta for the given active listing."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/listings\/{listing}\/availability?from=Y-m-d&to=Y-m-d",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:listing_id\/availability",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:listing_id\/availability",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"from\":\"2026-07-14\",\"to\":\"2052-08-06\"}"
+                        },
+                        "description": "Public endpoint. Returns per-date availability and pricing for hotel listings.\nWindow is capped at 365 days to prevent large result sets."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/listings\/{listing}\/suggested-technicians",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:listing_id\/suggested-technicians",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:listing_id\/suggested-technicians",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"category_id\":16}"
+                        },
+                        "description": "Suggest technicians for a listing based on its zone."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/listings\/{listing}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "architecto",
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Full listing detail. Active listings are public; owner can view any status."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/technicians\/suggest?zone_id=&category_id=",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technicians\/suggest",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technicians\/suggest"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"zone_id\":16,\"category_id\":16}"
+                        },
+                        "description": "Suggest technicians available for a given zone using scopeAvailableForZone.\nAlso usable via GET \/listings\/{id}\/suggested-technicians (same logic, zone derived from listing)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/technicians",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technicians",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technicians"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"category_id\":16,\"zone_id\":16,\"per_page\":22}"
+                        },
+                        "description": "Browse active, verified technicians. Filter by category, zone, sort by rating."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/technicians\/{technician}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technicians\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technicians\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the technician."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Full technician profile: skills, rate, area, rating, completed jobs count."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/plans",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/plans",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/plans"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "List all active subscription plans ordered by sort_order."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/plans\/{plan}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/plans\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/plans\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the plan."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Show a single active plan."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/packages",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/packages",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/packages"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "List all active listing packages (post-quota bundles), ordered by price."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/technician-categories",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technician-categories",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technician-categories"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "List all active categories ordered by sort_order."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/reviews?reviewable_type=listing&reviewable_id=1",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/reviews",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/reviews"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"reviewable_type\":\"architecto\",\"reviewable_id\":22,\"per_page\":7}"
+                        },
+                        "description": "Paginated visible reviews for a reviewable entity.\nIncludes avg_rating, total_count, and rating_distribution summary."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/compare?ids=1,2,3",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/compare",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/compare"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"ids\":\"architecto\"}"
+                        },
+                        "description": "Public endpoint. Returns listings side-by-side with key attributes\nfor rendering a comparison table on the website or app."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/auth\/logout",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/logout",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/logout"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Revoke the current Sanctum token."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/me",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/me\/photo",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/photo",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/photo"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "multipart\/form-data"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "photo",
+                                    "src": [],
+                                    "type": "file"
+                                }
+                            ]
+                        },
+                        "description": "Replaces the current avatar. Stores in public disk under avatars\/{id}\/."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/me\/password",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/password",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/password"
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"current_password\":\"architecto\",\"password\":\"]|{+-0pBNvYg\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/me\/verification",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/verification",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/verification"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "multipart\/form-data"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "document",
+                                    "src": [],
+                                    "type": "file"
+                                }
+                            ]
+                        },
+                        "description": "Upload a NID\/passport document \u2192 sets status to \"pending\".\nDocument is stored privately (never publicly accessible via URL)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/me\/verification",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/verification",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/verification"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/me\/notification-preferences",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/notification-preferences",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/notification-preferences"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns a nested map: { event: { channel: bool } }.\nMissing rows default to enabled (true)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/me\/notification-preferences",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/notification-preferences",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/notification-preferences"
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"chat\":{\"email\":true,\"sms\":true,\"push\":false,\"in_app\":false},\"alert\":{\"email\":false,\"sms\":false,\"push\":true,\"in_app\":true},\"booking\":{\"email\":true,\"sms\":false,\"push\":true,\"in_app\":false},\"lead\":{\"email\":false,\"sms\":false,\"push\":true,\"in_app\":true}}"
+                        },
+                        "description": "Accepts a partial map of { event: { channel: bool } }.\nOnly provided combinations are updated; omitted ones are untouched."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/me\/export",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/export",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/export"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Generates a full data export for the authenticated user (GDPR Art. 20).\nDispatches a queued job and returns a signed download URL valid for 1 hour.\nOn sync queue (shared hosting), the file is ready immediately."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/me\/export\/download?token=.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/export\/download",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/export\/download"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "..\n\nStreams the pre-generated export file to the client."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/me",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me"
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Initiates account deletion with a 30-day grace period.\nWithin the grace period the user can log in again to cancel.\nListings are soft-deleted immediately; conversations are preserved\n(the other party owns them)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/listings",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"zone_id\":16,\"type\":\"mess\",\"title\":\"n\",\"description\":\"Animi quos velit et fugiat.\",\"language_tag\":\"dljnik\",\"price\":7,\"service_charge\":87,\"advance_months\":13,\"bedrooms\":50,\"bathrooms\":62,\"floor\":16,\"total_floors\":22,\"area_sqft\":84,\"parking\":false,\"furnished\":false,\"allowed_for\":\"bachelor\",\"utility_flags\":[\"z\"],\"address\":\"m\",\"lat\":-90,\"lng\":-180}"
+                        },
+                        "description": "Create a new listing. Enforces post-limit guard before creation."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/listings\/{listing}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"zone_id\":16,\"type\":\"land\",\"title\":\"n\",\"description\":\"Animi quos velit et fugiat.\",\"language_tag\":\"dljnik\",\"price\":7,\"service_charge\":87,\"advance_months\":13,\"bedrooms\":50,\"bathrooms\":62,\"floor\":16,\"total_floors\":22,\"area_sqft\":84,\"parking\":false,\"furnished\":true,\"allowed_for\":\"family\",\"utility_flags\":[\"z\"],\"address\":\"m\",\"lat\":-90,\"lng\":-180}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/listings\/{listing}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/listings\/{listing}\/media",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:listing_id\/media",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:listing_id\/media",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "multipart\/form-data"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "cover_index",
+                                    "value": "27",
+                                    "type": "text",
+                                    "description": "validation.min."
+                                },
+                                {
+                                    "key": "videos[0][url]",
+                                    "value": "http:\/\/bailey.com\/",
+                                    "type": "text",
+                                    "description": ""
+                                },
+                                {
+                                    "key": "videos[0][source]",
+                                    "value": "youtube",
+                                    "type": "text",
+                                    "description": ""
+                                },
+                                {
+                                    "key": "videos[0][thumbnail]",
+                                    "value": "m",
+                                    "type": "text",
+                                    "description": ""
+                                },
+                                {
+                                    "key": "images[]",
+                                    "src": [],
+                                    "type": "file"
+                                }
+                            ]
+                        },
+                        "description": "Upload images and\/or add video URLs to a listing."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/listings\/{listing}\/media\/{type}\/{mediaId}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:listing_id\/media\/:type\/:mediaId",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:listing_id\/media\/:type\/:mediaId",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                },
+                                {
+                                    "id": "type",
+                                    "key": "type",
+                                    "value": "architecto",
+                                    "description": ""
+                                },
+                                {
+                                    "id": "mediaId",
+                                    "key": "mediaId",
+                                    "value": "architecto",
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Remove a single image or video from a listing."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PATCH \/api\/v1\/listings\/{listing}\/status",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:listing_id\/status",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:listing_id\/status",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"status\":\"sold\"}"
+                        },
+                        "description": "Owner marks a listing as rented, sold, or archived."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/listings\/{listing}\/freshness-confirm",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:listing_id\/freshness-confirm",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:listing_id\/freshness-confirm",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Owner confirms the listing is still accurate and available."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/favorites",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/favorites",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/favorites"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"per_page\":1}"
+                        },
+                        "description": "Paginated list of the authenticated user's favorited listings."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/favorites\/{listing}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/favorites\/:listing_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/favorites\/:listing_id",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Add a listing to favorites. Returns 409 if already favorited."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/favorites\/{listing}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/favorites\/:listing_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/favorites\/:listing_id",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Remove a listing from favorites."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/saved-searches",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/saved-searches",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/saved-searches"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/saved-searches",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/saved-searches",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/saved-searches"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"alert_on\":false,\"criteria\":{\"zone_id\":16,\"include_children\":true,\"type\":\"mess\",\"min_price\":39,\"max_price\":84,\"bedrooms\":12,\"bathrooms\":77,\"allowed_for\":\"bachelor\",\"furnished\":true,\"parking\":false,\"advance_months\":5,\"keyword\":\"y\"}}"
+                        },
+                        "description": "Stores the supplied filter criteria as a saved search.\nUp to 20 saved searches per user."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/saved-searches\/{savedSearch}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/saved-searches\/:savedSearch_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/saved-searches\/:savedSearch_id",
+                            "variable": [
+                                {
+                                    "id": "savedSearch_id",
+                                    "key": "savedSearch_id",
+                                    "value": 1,
+                                    "description": "The ID of the savedSearch."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"alert_on\":true,\"criteria\":{\"zone_id\":16,\"include_children\":true,\"type\":\"mess\",\"min_price\":39,\"max_price\":84,\"bedrooms\":12,\"bathrooms\":77,\"allowed_for\":\"family\",\"furnished\":true,\"parking\":false,\"advance_months\":5,\"keyword\":\"y\"}}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/saved-searches\/{savedSearch}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/saved-searches\/:savedSearch_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/saved-searches\/:savedSearch_id",
+                            "variable": [
+                                {
+                                    "id": "savedSearch_id",
+                                    "key": "savedSearch_id",
+                                    "value": 1,
+                                    "description": "The ID of the savedSearch."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/compare\/my",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/compare\/my",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/compare\/my"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns the authenticated user's persisted compare set."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/compare\/{listing}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/compare\/:listing_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/compare\/:listing_id",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Add a listing to the authenticated user's compare set (max 5)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/compare",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/compare",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/compare"
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Clear the entire compare set for the authenticated user."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/compare\/{listing}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/compare\/:listing_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/compare\/:listing_id",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Remove a single listing from the authenticated user's compare set."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/conversations",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/conversations",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/conversations"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "All conversations for the authenticated user (as starter or recipient),\nordered by latest activity. Includes per-conversation unread counts."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/conversations",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/conversations",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/conversations"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"listing_id\":16,\"message\":\"n\"}"
+                        },
+                        "description": "Start a conversation about a listing. Returns the existing conversation\nif one already exists between this pair for this listing.\nThe opening message is sent in the same request."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/conversations\/{conversation}\/messages",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/conversations\/:conversation_id\/messages",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/conversations\/:conversation_id\/messages",
+                            "variable": [
+                                {
+                                    "id": "conversation_id",
+                                    "key": "conversation_id",
+                                    "value": 1,
+                                    "description": "The ID of the conversation."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"per_page\":1}"
+                        },
+                        "description": "Paginated messages (newest first). Marks all incoming unread messages\nas read as a side effect of loading."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/conversations\/{conversation}\/messages",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/conversations\/:conversation_id\/messages",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/conversations\/:conversation_id\/messages",
+                            "variable": [
+                                {
+                                    "id": "conversation_id",
+                                    "key": "conversation_id",
+                                    "value": 1,
+                                    "description": "The ID of the conversation."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"message\":\"b\"}"
+                        },
+                        "description": "Send a message. Broadcasts to the private channel immediately."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/conversations\/{conversation}\/read",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/conversations\/:conversation_id\/read",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/conversations\/:conversation_id\/read",
+                            "variable": [
+                                {
+                                    "id": "conversation_id",
+                                    "key": "conversation_id",
+                                    "value": 1,
+                                    "description": "The ID of the conversation."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Explicitly mark all incoming messages as read (useful for cross-device sync)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/listings\/{listing}\/reveal-contact",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:listing_id\/reveal-contact",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:listing_id\/reveal-contact",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns the listing owner's phone number, subject to:\n  - owner's phone_visibility setting (403 if 'none')\n  - per-user monthly reveal quota (429 when exhausted)\n  - idempotent: revealing the same listing again in the same period is free"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/owner\/leads",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/owner\/leads",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/owner\/leads"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"property_listing_id\":16,\"per_page\":22}"
+                        },
+                        "description": "A unified, listing-filterable feed of visit requests, contact reveals,\nand inbound conversations across the authenticated owner's listings."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/owner\/leads\/summary",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/owner\/leads\/summary",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/owner\/leads\/summary"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"property_listing_id\":16}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/listings\/{listing}\/visits",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:listing_id\/visits",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:listing_id\/visits",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"scheduled_at\":\"2052-08-06\",\"note\":\"n\"}"
+                        },
+                        "description": "Request a visit for a listing."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/visits",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/visits",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/visits"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"per_page\":1}"
+                        },
+                        "description": "List visits for the authenticated user.\nRequesters see visits they made; listing owners see incoming requests."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PATCH \/api\/v1\/visits\/{visit}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/visits\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/visits\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the visit."
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"status\":\"confirmed\",\"note\":\"b\"}"
+                        },
+                        "description": "Confirm or cancel a visit.\n  - Requester: can cancel their own pending visit.\n  - Listing owner: can confirm or cancel any pending visit."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/blocks",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/block",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/block"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "List users the authenticated user has blocked."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/block\/{user}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/block\/:user_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/block\/:user_id",
+                            "variable": [
+                                {
+                                    "id": "user_id",
+                                    "key": "user_id",
+                                    "value": 1,
+                                    "description": "The ID of the user."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Block a user. Idempotent \u2014 silently returns 200 if already blocked."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/block\/{user}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/block\/:user_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/block\/:user_id",
+                            "variable": [
+                                {
+                                    "id": "user_id",
+                                    "key": "user_id",
+                                    "value": 1,
+                                    "description": "The ID of the user."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Unblock a user."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/reports",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/reports",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/reports"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"reportable_type\":\"listing\",\"reportable_id\":16,\"reason\":\"wrong_information\",\"details\":\"n\"}"
+                        },
+                        "description": "Submit a report for a user, listing, or review.\nOne report per reporter per entity (subsequent submissions update the reason\/details)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/listings\/{listing}\/availability",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/listings\/:listing_id\/availability",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/listings\/:listing_id\/availability",
+                            "variable": [
+                                {
+                                    "id": "listing_id",
+                                    "key": "listing_id",
+                                    "value": 1,
+                                    "description": "The ID of the listing."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"from\":\"2026-07-14\",\"to\":\"2052-08-06\",\"is_available\":true,\"override_price\":39}"
+                        },
+                        "description": "Owner-only. Block\/unblock dates and set per-date price overrides.\n\nBody:\n  from           Y-m-d (inclusive)\n  to             Y-m-d (exclusive \u2014 same convention as bookings)\n  is_available   bool  (optional)\n  override_price int   (optional, null to clear)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/bookings",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/bookings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/bookings"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"per_page\":1}"
+                        },
+                        "description": "List the authenticated user's bookings."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/bookings",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/bookings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/bookings"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"listing_id\":16,\"check_in\":\"2052-08-06\",\"check_out\":\"2052-08-06\",\"guests\":12,\"special_requests\":\"g\"}"
+                        },
+                        "description": "Create a hotel booking.\n\nIdempotency: include X-Idempotency-Key header to make the request\nidempotent. Repeating with the same key durably returns the original\nbooking response, even after a cache flush.\n\nRace conditions: a distributed lock on (listing, check_in, check_out)\nprevents double-booking under concurrent requests."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/bookings\/{booking}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/bookings\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/bookings\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the booking."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Show a single booking. Guest or listing owner may view."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/bookings\/{booking}\/cancel",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/bookings\/:booking_id\/cancel",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/bookings\/:booking_id\/cancel",
+                            "variable": [
+                                {
+                                    "id": "booking_id",
+                                    "key": "booking_id",
+                                    "value": 1,
+                                    "description": "The ID of the booking."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Cancel a booking and compute the refund entitlement.\nThe actual refund payment is processed in Phase 10.\n\nQuery param: ?preview=1 returns refund info without cancelling."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/technician\/apply",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technician\/apply",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technician\/apply"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"technician_category_id\":16,\"zone_id\":16,\"bio\":\"n\",\"skills\":[\"g\"],\"experience_years\":16,\"hourly_rate\":77}"
+                        },
+                        "description": "Submit a technician application (pending admin approval).\nA user can only have one technician profile."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/technician\/profile",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technician\/profile",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technician\/profile"
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"bio\":\"b\",\"skills\":[\"n\"],\"experience_years\":7,\"hourly_rate\":12,\"is_available\":false,\"zone_id\":16}"
+                        },
+                        "description": "Update the authenticated user's technician profile."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/technician-bookings",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technician-bookings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technician-bookings"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"per_page\":1}"
+                        },
+                        "description": "List bookings. role=customer (default) shows bookings I placed.\nrole=technician shows bookings assigned to my technician profile."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/technician-bookings",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technician-bookings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technician-bookings"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"technician_id\":16,\"description\":\"Et animi quos velit et fugiat.\",\"scheduled_at\":\"2052-08-06\",\"address\":\"n\",\"is_urgent\":false}"
+                        },
+                        "description": "Book a technician. Creates booking in 'pending' status awaiting a quote."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/technician-bookings\/{booking}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technician-bookings\/:technicianBooking_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technician-bookings\/:technicianBooking_id",
+                            "variable": [
+                                {
+                                    "id": "technicianBooking_id",
+                                    "key": "technicianBooking_id",
+                                    "value": 1,
+                                    "description": "The ID of the technicianBooking."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Show a single booking. Only the customer or the assigned technician may view."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/technician-bookings\/{booking}\/quote",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technician-bookings\/:technicianBooking_id\/quote",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technician-bookings\/:technicianBooking_id\/quote",
+                            "variable": [
+                                {
+                                    "id": "technicianBooking_id",
+                                    "key": "technicianBooking_id",
+                                    "value": 1,
+                                    "description": "The ID of the technicianBooking."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"amount\":16,\"description\":\"Et animi quos velit et fugiat.\",\"valid_until\":\"2052-08-06\"}"
+                        },
+                        "description": "Technician submits a quote. Booking must be 'pending'.\nMoves booking status to 'quoted'."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/technician-bookings\/{booking}\/quote\/accept",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technician-bookings\/:technicianBooking_id\/quote\/accept",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technician-bookings\/:technicianBooking_id\/quote\/accept",
+                            "variable": [
+                                {
+                                    "id": "technicianBooking_id",
+                                    "key": "technicianBooking_id",
+                                    "value": 1,
+                                    "description": "The ID of the technicianBooking."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Customer accepts the latest pending quote.\nBooking moves to 'accepted', agreed_amount set, other quotes rejected."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/technician-bookings\/{booking}\/quote\/reject",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/technician-bookings\/:technicianBooking_id\/quote\/reject",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/technician-bookings\/:technicianBooking_id\/quote\/reject",
+                            "variable": [
+                                {
+                                    "id": "technicianBooking_id",
+                                    "key": "technicianBooking_id",
+                                    "value": 1,
+                                    "description": "The ID of the technicianBooking."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Customer rejects the latest pending quote.\nBooking reverts to 'pending' if no other pending quotes remain."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/maintenance-requests",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/maintenance-requests",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/maintenance-requests"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"per_page\":1}"
+                        },
+                        "description": "List maintenance requests. role=tenant (default) or role=owner."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/maintenance-requests",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/maintenance-requests",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/maintenance-requests"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"property_listing_id\":16,\"title\":\"n\",\"description\":\"Animi quos velit et fugiat.\",\"priority\":\"urgent\",\"technician_id\":16}"
+                        },
+                        "description": "Tenant submits a maintenance request for a property.\nGated behind the 'maintenance_requests' subscription feature."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/rent-management\/units?property_listing_id=",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/units",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/units"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"property_listing_id\":16}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/rent-management\/units",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/units",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/units"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"property_listing_id\":16,\"name\":\"n\",\"floor\":\"g\",\"rent_amount\":12,\"status\":\"occupied\",\"notes\":\"m\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT api\/v1\/rent-management\/units\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/units\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/units\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 16,
+                                    "description": "The ID of the unit."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"floor\":\"n\",\"rent_amount\":84,\"status\":\"occupied\",\"notes\":\"z\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE api\/v1\/rent-management\/units\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/units\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/units\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 16,
+                                    "description": "The ID of the unit."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/rent-management\/tenancies",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/tenancies",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/tenancies"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"property_listing_id\":16,\"per_page\":22}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/rent-management\/tenancies",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/tenancies",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/tenancies"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"property_listing_id\":16,\"unit_id\":16,\"tenant_id\":16,\"tenant_name\":\"n\",\"tenant_phone\":\"g\",\"tenant_email\":\"rowan.gulgowski@example.com\",\"rent_amount\":42,\"deposit_amount\":37,\"due_day_of_month\":19,\"start_date\":\"2026-07-14T07:03:12\",\"end_date\":\"2052-08-06\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/rent-management\/tenancies\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/tenancies\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/tenancies\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 16,
+                                    "description": "The ID of the tenancy."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT api\/v1\/rent-management\/tenancies\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/tenancies\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/tenancies\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 16,
+                                    "description": "The ID of the tenancy."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"rent_amount\":27,\"deposit_amount\":39,\"due_day_of_month\":7,\"end_date\":\"2026-07-14T07:03:12\",\"status\":\"active\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE api\/v1\/rent-management\/tenancies\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/tenancies\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/tenancies\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 16,
+                                    "description": "The ID of the tenancy."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/rent-management\/rent-payments",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/rent-payments",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/rent-payments"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"tenancy_id\":16,\"per_page\":22}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/rent-management\/rent-payments\/{rentPayment}\/mark-paid",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/rent-payments\/:rentPayment_id\/mark-paid",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/rent-payments\/:rentPayment_id\/mark-paid",
+                            "variable": [
+                                {
+                                    "id": "rentPayment_id",
+                                    "key": "rentPayment_id",
+                                    "value": 16,
+                                    "description": "The ID of the rentPayment."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Marks a rent payment paid; issues a receipt when the 'receipts' feature is unlocked."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/rent-management\/ledger-transactions",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/ledger-transactions",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/ledger-transactions"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"property_listing_id\":16,\"from\":\"2026-07-14T07:03:12\",\"to\":\"2026-07-14T07:03:12\",\"per_page\":22}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/rent-management\/ledger-transactions\/summary",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/ledger-transactions\/summary",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/ledger-transactions\/summary"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"from\":\"2026-07-14T07:03:12\",\"to\":\"2026-07-14T07:03:12\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/rent-management\/ledger-transactions",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/ledger-transactions",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/ledger-transactions"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"type\":\"expense\",\"category\":\"b\",\"amount\":22,\"occurred_on\":\"2026-07-14T07:03:12\",\"description\":\"Animi quos velit et fugiat.\",\"property_listing_id\":16,\"tenancy_id\":16}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/rent-management\/agreement-templates",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/agreement-templates",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/agreement-templates"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/rent-management\/agreement-templates",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/agreement-templates",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/agreement-templates"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"body\":\"n\",\"is_default\":true}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT api\/v1\/rent-management\/agreement-templates\/{agreementTemplate_id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/agreement-templates\/:agreementTemplate_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/agreement-templates\/:agreementTemplate_id",
+                            "variable": [
+                                {
+                                    "id": "agreementTemplate_id",
+                                    "key": "agreementTemplate_id",
+                                    "value": 16,
+                                    "description": "The ID of the agreementTemplate."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"body\":\"n\",\"is_default\":false}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE api\/v1\/rent-management\/agreement-templates\/{agreementTemplate_id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/agreement-templates\/:agreementTemplate_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/agreement-templates\/:agreementTemplate_id",
+                            "variable": [
+                                {
+                                    "id": "agreementTemplate_id",
+                                    "key": "agreementTemplate_id",
+                                    "value": 16,
+                                    "description": "The ID of the agreementTemplate."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/rent-management\/agreements",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/agreements",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/agreements"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"tenancy_id\":16}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/rent-management\/agreements",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/agreements",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/agreements"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"tenancy_id\":16,\"agreement_template_id\":16}"
+                        },
+                        "description": "Generates an agreement document from a template (or the owner's default) for a tenancy."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/rent-management\/agreements\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/rent-management\/agreements\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/rent-management\/agreements\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 16,
+                                    "description": "The ID of the agreement."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/subscriptions",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/subscriptions",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/subscriptions"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"plan_id\":16,\"payment_method\":\"wallet\",\"auto_renew\":false,\"coupon_code\":\"n\"}"
+                        },
+                        "description": "Subscribe to a plan.\n\npayment_method=wallet: deducts from wallet balance and activates immediately.\npayment_method=gateway (default): creates a pending subscription + pending payment\n                                  for Phase 10 gateway completion."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/me\/subscription",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/subscription",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/subscription"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Show the authenticated user's current (or most recent) subscription."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/me\/subscription\/cancel",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/subscription\/cancel",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/subscription\/cancel"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Cancel the active subscription. Access ends at the original ends_at date."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/me\/limits",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/limits",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/limits"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Return the authenticated user's post-limit status and feature gate map.\nThe feature_gates object maps every known feature to a boolean, so the\nfrontend can lock\/unlock UI elements without knowing the full feature list."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/packages\/{package}\/buy",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/packages\/:package_id\/buy",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/packages\/:package_id\/buy",
+                            "variable": [
+                                {
+                                    "id": "package_id",
+                                    "key": "package_id",
+                                    "value": 1,
+                                    "description": "The ID of the package."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"payment_method\":\"gateway\",\"coupon_code\":\"b\"}"
+                        },
+                        "description": "Purchase a listing package to add extra post quota.\n\npayment_method=wallet: deducts from wallet and creates a paid payment immediately.\npayment_method=gateway (default): creates a pending payment for Phase 10."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/wallet",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/wallet",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/wallet"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Show the authenticated user's wallet balance.\nAuto-creates the wallet if this is the first access."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/wallet\/transactions",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/wallet\/transactions",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/wallet\/transactions"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"type\":\"credit\",\"per_page\":1}"
+                        },
+                        "description": "Paginated transaction history for the authenticated user's wallet."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/wallet\/topup",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/wallet\/topup",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/wallet\/topup"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"amount\":95,\"gateway\":\"n\"}"
+                        },
+                        "description": "Request a wallet top-up. Creates a pending Payment record.\nPhase 10 gateway webhook will credit the wallet on payment confirmation."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/coupons\/apply",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/coupons\/apply",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/coupons\/apply"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"code\":\"b\",\"amount\":22,\"context\":\"subscription\"}"
+                        },
+                        "description": "Validate a coupon code and return the discounted amount for a given purchase.\nThis endpoint does NOT consume the coupon \u2014 it only previews the discount.\nThe coupon is consumed when the payment is marked as paid (Phase 10)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/reviews",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/reviews",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/reviews"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"reviewable_type\":\"technician\",\"reviewable_id\":16,\"rating\":2,\"body\":\"g\"}"
+                        },
+                        "description": "Submit a review for a listing, technician, or user.\nGUARD: the reviewer must have a completed booking\/job with that entity.\nThe unique constraint (reviewer_id, reviewable_type, reviewable_id) prevents duplicates."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/reviews\/{review}\/report",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/reviews\/:review_id\/report",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/reviews\/:review_id\/report",
+                            "variable": [
+                                {
+                                    "id": "review_id",
+                                    "key": "review_id",
+                                    "value": 1,
+                                    "description": "The ID of the review."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"reason\":\"architecto\",\"details\":\"n\"}"
+                        },
+                        "description": "Flag a review as abusive. Delegates to the existing Report system\n(reportable_type=review is already supported by StoreReportRequest).\nThis is a convenience alias so the client doesn't need the generic report endpoint."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/notifications",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/notifications",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/notifications"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"unread\":true,\"per_page\":1}"
+                        },
+                        "description": "Paginated in-app notifications for the authenticated user.\nOptional filter: ?unread=1"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/notifications\/unread-count",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/notifications\/unread-count",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/notifications\/unread-count"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns the number of unread in-app notifications."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/notifications\/read-all",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/notifications\/read-all",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/notifications\/read-all"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Mark all unread notifications for the authenticated user as read."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/notifications\/{notification}\/read",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/notifications\/:notification_id\/read",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/notifications\/:notification_id\/read",
+                            "variable": [
+                                {
+                                    "id": "notification_id",
+                                    "key": "notification_id",
+                                    "value": 1,
+                                    "description": "The ID of the notification."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Mark a single notification as read."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/devices",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/devices",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/devices"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"token\":\"b\",\"platform\":\"android\",\"name\":\"n\"}"
+                        },
+                        "description": "Register or update a device token for push notifications.\nIf the same token is already registered to another account it is\nre-associated with the current user (device was handed over \/ re-logged in)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/devices\/{device}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/devices\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/devices\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the device."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Unregister a device token (e.g. on logout)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/payments\/{payment}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/payments\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/payments\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 1,
+                                    "description": "The ID of the payment."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Return the current status of a payment (owner only)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/payments\/{payment}\/initiate",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/payments\/:payment_id\/initiate",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/payments\/:payment_id\/initiate",
+                            "variable": [
+                                {
+                                    "id": "payment_id",
+                                    "key": "payment_id",
+                                    "value": 1,
+                                    "description": "The ID of the payment."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"gateway\":\"razorpay\"}"
+                        },
+                        "description": "Initiate a pending payment through the chosen gateway.\nIdempotency: repeat calls with the same X-Idempotency-Key return the cached response."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/payments\/{payment}\/refund",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/payments\/:payment_id\/refund",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/payments\/:payment_id\/refund",
+                            "variable": [
+                                {
+                                    "id": "payment_id",
+                                    "key": "payment_id",
+                                    "value": 1,
+                                    "description": "The ID of the payment."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"amount\":16,\"reason\":\"n\"}"
+                        },
+                        "description": "Request a refund for a paid payment.\nPartial refunds are supported by passing an amount."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/webhooks\/{gateway}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/webhooks\/:gateway",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/webhooks\/:gateway",
+                            "variable": [
+                                {
+                                    "id": "gateway",
+                                    "key": "gateway",
+                                    "value": "architecto",
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Receive a server-to-server webhook from a payment gateway.\nValidates the signature, finds the matching Payment, and activates the payable."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/payments\/callback\/{gateway}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/payments\/callback\/:gateway",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/payments\/callback\/:gateway",
+                            "variable": [
+                                {
+                                    "id": "gateway",
+                                    "key": "gateway",
+                                    "value": "architecto",
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Browser redirect callback after the user completes (or cancels) payment on the\ngateway's hosted page. Captures the order (PayPal) or executes the payment (bKash)."
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "Authorization",
+                "type": "string"
+            }
+        ]
+    }
+}

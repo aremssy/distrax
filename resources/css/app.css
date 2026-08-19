@@ -1,0 +1,333 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/* Class-based dark mode: add/remove `dark` class on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --color-brand: #5352ed;
+    --color-indigo-600: #5352ed;
+
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Website semantic tokens mapped to the home page palette. */
+    --color-background: var(--color-slate-50);
+    --color-surface: var(--color-white);
+    --color-surface-bright: var(--color-white);
+    --color-surface-blue-tint: var(--color-slate-50);
+    --color-surface-container-lowest: var(--color-white);
+    --color-surface-container-low: var(--color-slate-50);
+    --color-surface-container: var(--color-slate-100);
+    --color-surface-container-high: var(--color-slate-200);
+    --color-surface-container-highest: var(--color-slate-300);
+    --color-surface-dim: var(--color-slate-200);
+    --color-surface-variant: var(--color-slate-200);
+    --color-on-background: var(--color-slate-950);
+    --color-on-surface: var(--color-slate-800);
+    --color-on-surface-dark: var(--color-slate-950);
+    --color-on-surface-variant: var(--color-slate-600);
+    --color-primary: var(--color-indigo-600);
+    --color-primary-container: var(--color-indigo-600);
+    --color-primary-fixed: var(--color-indigo-200);
+    --color-primary-fixed-dim: var(--color-indigo-300);
+    --color-primary-fixed-variant: var(--color-indigo-700);
+    --color-on-primary: var(--color-white);
+    --color-on-primary-container: var(--color-white);
+    --color-on-primary-fixed: var(--color-indigo-950);
+    --color-on-primary-fixed-variant: var(--color-indigo-800);
+    --color-inverse-primary: var(--color-indigo-300);
+    --color-surface-tint: var(--color-indigo-600);
+    --color-success-vibrant: var(--color-emerald-500);
+    --color-secondary: var(--color-slate-600);
+    --color-secondary-container: var(--color-slate-100);
+    --color-secondary-fixed: var(--color-slate-200);
+    --color-secondary-fixed-dim: var(--color-slate-300);
+    --color-secondary-fixed-variant: var(--color-slate-700);
+    --color-on-secondary: var(--color-white);
+    --color-on-secondary-container: var(--color-slate-700);
+    --color-on-secondary-fixed: var(--color-slate-900);
+    --color-on-secondary-fixed-variant: var(--color-slate-700);
+    --color-tertiary: var(--color-indigo-600);
+    --color-tertiary-container: var(--color-indigo-600);
+    --color-tertiary-fixed: var(--color-indigo-100);
+    --color-tertiary-fixed-dim: var(--color-indigo-200);
+    --color-on-tertiary: var(--color-white);
+    --color-on-tertiary-container: var(--color-indigo-100);
+    --color-on-tertiary-fixed: var(--color-indigo-950);
+    --color-on-tertiary-fixed-variant: var(--color-indigo-700);
+    --color-rent-accent: var(--color-indigo-400);
+    --color-inverse-surface: var(--color-slate-950);
+    --color-inverse-on-surface: var(--color-slate-100);
+    --color-outline: var(--color-slate-500);
+    --color-outline-variant: var(--color-slate-300);
+    --color-error: var(--color-red-700);
+    --color-error-container: var(--color-red-100);
+    --color-on-error: var(--color-white);
+    --color-on-error-container: var(--color-red-800);
+    --color-ceiling: var(--color-slate-100);
+
+    --spacing-margin-mobile: 1rem;
+    --spacing-margin-desktop: 5rem;
+    --spacing-gutter: 1.5rem;
+    --spacing-container-max-width: 80rem;
+
+    --font-body-sm: var(--font-sans);
+    --font-body-md: var(--font-sans);
+    --font-body-lg: var(--font-sans);
+    --font-label-sm: var(--font-sans);
+    --font-label-md: var(--font-sans);
+    --font-headline-sm: var(--font-sans);
+    --font-headline-md: var(--font-sans);
+    --font-headline-lg: var(--font-sans);
+    --font-headline-xl: var(--font-sans);
+
+    --text-label-sm: 0.75rem;
+    --text-label-sm--line-height: 1rem;
+    --text-label-md: 0.875rem;
+    --text-label-md--line-height: 1.25rem;
+    --text-body-sm: 0.875rem;
+    --text-body-sm--line-height: 1.4rem;
+    --text-body-md: 1rem;
+    --text-body-md--line-height: 1.6rem;
+    --text-body-lg: 1.125rem;
+    --text-body-lg--line-height: 1.8rem;
+    --text-headline-sm: 1.125rem;
+    --text-headline-sm--line-height: 1.7rem;
+    --text-headline-md: 1.5rem;
+    --text-headline-md--line-height: 2.1rem;
+    --text-headline-lg: 2rem;
+    --text-headline-lg--line-height: 2.6rem;
+    --text-headline-xl: 3rem;
+    --text-headline-xl--line-height: 3.6rem;
+
+    /* Admin dark-mode palette (deep navy, from brand reference).
+       night-400/500 are the muted-TEXT steps (must stay ≥4.5:1 on night-900 cards);
+       night-600→950 are surface/border steps. Splitting text from surface fixes the
+       old problem where the border-weight #4b5285 was reused as body text at ~2.5:1. */
+    /* Text steps are near-white in dark mode (no navy tint); only the surface/border
+       steps below carry the navy identity. A slight shade keeps a subtle hierarchy. */
+    --color-night-400: #ffffff; /* brightest text, white */
+    --color-night-500: #f3f4f6; /* muted text — labels, timestamps, table headers (white) */
+    --color-night-600: #d1d5db; /* most subtle text / scrollbar (light grey) */
+    --color-night-700: #2b2f5c; /* borders, dividers (navy) */
+    --color-night-800: #191c3b; /* raised surfaces — table headers, inputs, hover (navy) */
+    --color-night-900: #10122b; /* card / panel background (navy) */
+    --color-night-950: #0a0b1e; /* app background (navy) */
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+/* Admin panel font (Nunito, loaded via Google Fonts in the admin layouts).
+   Overriding --font-sans here keeps every font-sans utility consistent. */
+.font-admin {
+    --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-sans);
+}
+
+@layer base {
+    .material-symbols-outlined {
+        display: inline-block;
+        vertical-align: middle;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .material-symbols-outlined.fill,
+    .material-symbols-outlined.filled,
+    .icon-fill {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+}
+
+@layer components {
+    /* Slim, unobtrusive scrollbar for the admin sidebar/content panes. */
+    .scrollbar-slim {
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-slate-300) transparent;
+    }
+
+    .scrollbar-slim::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+    }
+
+    .scrollbar-slim::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-slim::-webkit-scrollbar-thumb {
+        border-radius: 9999px;
+        background-color: var(--color-slate-300);
+    }
+
+    .dark .scrollbar-slim {
+        scrollbar-color: var(--color-night-600) transparent;
+    }
+
+    .dark .scrollbar-slim::-webkit-scrollbar-thumb {
+        background-color: var(--color-night-600);
+    }
+
+    .form-input-focus:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 10%, transparent);
+        outline: none;
+    }
+
+    .glass-panel {
+        background: rgb(255 255 255 / 95%);
+        backdrop-filter: blur(10px);
+    }
+
+    .role-card:has(input:checked) {
+        border-color: var(--color-primary);
+        background-color: var(--color-indigo-50);
+        box-shadow: 0 0 0 1px var(--color-primary);
+    }
+
+    .strength-bar,
+    .property-card-hover {
+        transition: all 300ms ease;
+    }
+
+    .property-card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px -5px rgb(15 23 42 / 10%), 0 8px 10px -6px rgb(15 23 42 / 10%);
+    }
+
+    .toggle-checkbox:checked {
+        right: 0;
+        border-color: var(--color-primary);
+    }
+
+    .toggle-checkbox:checked + .toggle-label {
+        background-color: var(--color-primary);
+    }
+
+    .toggle-checkbox:checked + .toggle-label::after {
+        transform: translateX(100%);
+        border-color: var(--color-white);
+    }
+
+}
+
+/* Instant theme switch: while the dark class is toggled, kill every transition so the
+   page flips at once instead of animating hundreds of colour transitions. The class is
+   added by the toggle handler and removed on the next frame, so hover animations resume. */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+    transition: none !important;
+}
+
+/* Admin dark mode: keep text bright and near-white for readability. Scoped to the admin
+   panel so the public site's tuned dark palette is untouched. The selectors target the
+   `dark:` text utilities the components actually use, brightening the muted greys. */
+.dark .admin-panel {
+    color: #f8fafc;
+}
+
+.dark .admin-panel :is(.dark\:text-slate-100, .dark\:text-slate-200, .dark\:text-slate-300, .dark\:text-white) {
+    color: #ffffff;
+}
+
+.dark .admin-panel :is(.dark\:text-slate-400, .dark\:text-slate-500, .dark\:text-night-600) {
+    color: #e2e8f0;
+}
+
+/* Public-site SweetAlert2 toasts — a clean, modern notification card with a bold
+   heading over a muted message and a full-width bottom progress bar on a soft
+   track. Scoped to `.site-swal` set in app.js so admin dialogs are untouched;
+   per-type colour comes from --site-accent. */
+.site-swal.swal2-popup.swal2-toast {
+    --site-accent: #5352ed;
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    column-gap: 0.95rem;
+    width: auto;
+    min-width: 21rem;
+    max-width: 25rem;
+    padding: 1rem 1.15rem 1.15rem;
+    border: 1px solid #eef1f6;
+    border-radius: 1rem;
+    box-shadow:
+        0 14px 34px -12px rgba(15, 23, 42, 0.24),
+        0 2px 8px -3px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+}
+
+/* Soft track behind the timer bar, flush along the bottom edge. */
+.site-swal.swal2-popup.swal2-toast::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 4px;
+    background: #eef1f6;
+}
+
+.site-swal .site-swal__title {
+    grid-column: 2;
+    margin: 0;
+    padding: 0;
+    text-align: start;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #111827;
+}
+
+.site-swal .site-swal__text {
+    grid-column: 2;
+    margin: 0.15rem 0 0;
+    padding: 0;
+    text-align: start;
+    font-size: 0.855rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #64748b;
+}
+
+.site-swal__bar {
+    background: var(--site-accent) !important;
+    height: 4px;
+}
+
+.site-swal__close {
+    grid-row: 1 / span 2;
+    align-self: center;
+    margin: 0;
+    color: #cbd5e1;
+    font-size: 1.5rem;
+    transition: color 0.15s ease;
+    box-shadow: none !important;
+}
+
+.site-swal__close:hover {
+    color: #64748b;
+}
+
+/* Per-type accent palette for the progress bar. */
+.site-swal--success {
+    --site-accent: #22c55e;
+}
+
+.site-swal--error {
+    --site-accent: #ef4444;
+}
+
+.site-swal--warning {
+    --site-accent: #f59e0b;
+}
+
+.site-swal--info {
+    --site-accent: #5352ed;
+}

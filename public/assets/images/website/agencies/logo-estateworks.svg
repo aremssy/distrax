@@ -1,0 +1,9 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Estate Works logo</title>
+  <desc id="desc">A red keyhole mark with a house roof.</desc>
+  <rect x="18" y="18" width="92" height="92" rx="24" fill="#FFF8F8"/>
+  <path d="M37 62L64 40L91 62" stroke="#DC2626" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M44 61V89H84V61" stroke="#DC2626" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="64" cy="72" r="9" fill="#DC2626"/>
+  <rect x="61.5" y="78" width="5" height="10" rx="2.5" fill="#DC2626"/>
+</svg>
