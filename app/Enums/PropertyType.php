@@ -17,6 +17,8 @@ enum PropertyType: string
     case Mess = 'mess';
     case Land = 'land';
     case Commercial = 'commercial';
+    case Residential = 'Residential';
+    case Industrial = 'Industrial';
     case Office = 'office';
     case Room = 'room';
     case Vacation = 'vacation';
@@ -32,6 +34,8 @@ enum PropertyType: string
             self::Mess => 'Shared Mess',
             self::Land => 'Land / Plot',
             self::Commercial => 'Commercial',
+            self::Residential => 'Residential',
+            self::Industrial => 'Industrial',
             self::Office => 'Office Space',
             self::Room => 'Room / Shared',
             self::Vacation => 'Vacation Rental',
