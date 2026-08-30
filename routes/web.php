@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\Website\AccountController;
+use App\Http\Controllers\Website\AskDistraxController;
 use App\Http\Controllers\Website\AgencyTeamController;
 use App\Http\Controllers\Website\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Website\Auth\ForgotPasswordController;
@@ -24,7 +25,12 @@ use App\Http\Controllers\Website\OwnerListingController;
 use App\Http\Controllers\Website\PageController;
 use App\Http\Controllers\Website\PreferenceController;
 use App\Http\Controllers\Website\ProjectController;
+use App\Http\Controllers\Website\OfferController;
+use App\Http\Controllers\Website\InspectionController;
+use App\Http\Controllers\Website\InstitutionalController;
+use App\Http\Controllers\Website\EscrowInvestController;
 use App\Http\Controllers\Website\PropertyController;
+use App\Http\Controllers\Website\VerificationPassportController;
 use App\Http\Controllers\Website\RentManagement\AgreementController as WebsiteAgreementController;
 use App\Http\Controllers\Website\RentManagement\LedgerController as WebsiteLedgerController;
 use App\Http\Controllers\Website\RentManagement\RentManagementController;
@@ -73,6 +79,8 @@ Route::get('/properties', [PropertyController::class, 'index'])->name('propertie
 // canonical slug inside each controller action (a numeric segment can't be a slug).
 Route::get('/properties/{property:slug}', [PropertyController::class, 'show'])->name('properties.show');
 Route::get('/properties/{property:slug}/distance', [PropertyController::class, 'distance'])->name('properties.distance');
+Route::post('/properties/{property:slug}/ask-distrax', [AskDistraxController::class, 'ask'])->name('properties.ask-distrax')->middleware('throttle:20,1');
+Route::get('/verify/{reference}', [VerificationPassportController::class, 'show'])->name('verify.show');
 Route::get('/technicians', [MarketplaceController::class, 'technicians'])->name('technicians.index');
 Route::get('/technicians/{technician:slug}', [MarketplaceController::class, 'technician'])->name('technicians.show');
 Route::get('/agencies', [MarketplaceController::class, 'agencies'])->name('agencies.index');
@@ -175,8 +183,31 @@ Route::middleware('auth')->group(function () {
     Route::post('/reviews', [TrustController::class, 'review'])->name('reviews.store');
     Route::post('/reports', [TrustController::class, 'report'])->name('reports.store');
     Route::post('/disputes', [TrustController::class, 'dispute'])->name('disputes.store');
+
+    Route::get('/offers', [OfferController::class, 'index'])->name('offers.index');
+    Route::get('/offers/{offer}', [OfferController::class, 'show'])->name('offers.show');
+    Route::get('/properties/{property}/offers/create', [OfferController::class, 'create'])->name('offers.create');
+    Route::post('/properties/{property}/offers', [OfferController::class, 'store'])->name('offers.store');
+    Route::post('/offers/{offer}/counter', [OfferController::class, 'counter'])->name('offers.counter');
+    Route::post('/offers/{offer}/accept', [OfferController::class, 'accept'])->name('offers.accept');
+    Route::post('/offers/{offer}/reject', [OfferController::class, 'reject'])->name('offers.reject');
+    Route::post('/offers/{offer}/withdraw', [OfferController::class, 'withdraw'])->name('offers.withdraw');
+
+    Route::get('/inspections', [InspectionController::class, 'index'])->name('inspections.index');
+    Route::get('/inspections/{inspection}', [InspectionController::class, 'show'])->name('inspections.show');
+    Route::get('/properties/{property}/inspections/create', [InspectionController::class, 'create'])->name('inspections.create');
+    Route::post('/properties/{property}/inspections', [InspectionController::class, 'store'])->name('inspections.store');
+    Route::post('/inspections/{inspection}/acknowledge', [InspectionController::class, 'acknowledge'])->name('inspections.acknowledge');
+    Route::post('/inspections/{inspection}/cancel', [InspectionController::class, 'cancel'])->name('inspections.cancel');
+
     Route::post('/saved-searches', [EngagementController::class, 'storeSavedSearch'])->name('saved-searches.store');
     Route::delete('/saved-searches/{savedSearch}', [EngagementController::class, 'destroySavedSearch'])->name('saved-searches.destroy');
+
+    Route::get('/institutional', [InstitutionalController::class, 'index'])->name('institutional.index');
+    Route::post('/institutional/upload', [InstitutionalController::class, 'store'])->middleware('throttle:10,1')->name('institutional.upload');
+
+    Route::get('/escrow-invest', [EscrowInvestController::class, 'index'])->name('escrow-invest.index');
+
     Route::get('/become-a-technician', [TechnicianApplicationController::class, 'create'])->name('technician.apply');
     Route::post('/become-a-technician', [TechnicianApplicationController::class, 'store'])->middleware('throttle:10,1')->name('technician.apply.store');
 

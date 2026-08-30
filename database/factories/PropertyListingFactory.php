@@ -47,6 +47,14 @@ class PropertyListingFactory extends Factory
             'last_freshness_check_at' => now(),
             'needs_confirmation_at' => now()->addMonth(),
             'published_at' => now(),
+            'distress_reason_category' => null,
+            'distress_reason_visibility' => 'disclosure_only',
+            'expected_closing_period' => 'flexible',
+            'negotiation_flexibility' => 'negotiable',
+            'expected_market_value' => null,
+            'deal_score_cached' => null,
+            'verification_case_id' => null,
+            'inspection_access_enabled' => false,
         ];
     }
 

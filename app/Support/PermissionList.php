@@ -55,6 +55,21 @@ class PermissionList
             'Reviews' => [
                 'reviews.view', 'reviews.edit', 'reviews.delete',
             ],
+            'Verification Cases' => [
+                'verification_cases.view', 'verification_cases.assign', 'verification_cases.finalize', 'verification_tasks.update',
+            ],
+            'Deals & Transactions' => [
+                'deals.view', 'deals.edit', 'deals.advance', 'deals.cancel',
+            ],
+            'Offers' => [
+                'offers.view', 'offers.edit',
+            ],
+            'Legal Matters' => [
+                'legal_matters.view', 'legal_matters.edit', 'legal_matters.resolve',
+            ],
+            'Inspections' => [
+                'inspections.view', 'inspections.assign',
+            ],
             'Reports' => [
                 'reports.view', 'reports.edit', 'reports.delete',
             ],

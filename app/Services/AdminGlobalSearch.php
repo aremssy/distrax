@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Blog;
+use App\Models\Deal;
+use App\Models\LegalMatter;
 use App\Models\Payment;
 use App\Models\PropertyListing;
 use App\Models\Technician;
@@ -104,6 +106,43 @@ class AdminGlobalSearch
                     'label' => $payment->transaction_ref,
                     'sub' => money($payment->amount, $payment->currency).' — '.($payment->user->name ?? 'Unknown'),
                     'url' => route('admin.payments.show', $payment),
+                ];
+            }
+        }
+
+        if ($this->canView($admin, 'deals.view')) {
+            $deals = Deal::with(['listing:id,title', 'buyer:id,name'])
+                ->whereHas('listing', fn ($q) => $q->where('title', 'like', $like))
+                ->orWhereHas('buyer', fn ($q) => $q->where('name', 'like', $like))
+                ->orWhereHas('seller', fn ($q) => $q->where('name', 'like', $like))
+                ->limit(5)
+                ->get(['id', 'property_listing_id', 'buyer_id', 'stage']);
+
+            foreach ($deals as $deal) {
+                $results[] = [
+                    'group' => 'Deals',
+                    'icon' => 'hand-coins',
+                    'label' => $deal->listing?->title ?? 'Deal #'.$deal->id,
+                    'sub' => ucfirst(str_replace('_', ' ', $deal->stage)),
+                    'url' => route('admin.deals.show', $deal),
+                ];
+            }
+        }
+
+        if ($this->canView($admin, 'legal_matters.view')) {
+            $matters = LegalMatter::with(['deal.listing:id,title'])
+                ->whereHas('deal.listing', fn ($q) => $q->where('title', 'like', $like))
+                ->orWhere('type', 'like', $like)
+                ->limit(5)
+                ->get(['id', 'deal_id', 'type', 'status']);
+
+            foreach ($matters as $matter) {
+                $results[] = [
+                    'group' => 'Legal Matters',
+                    'icon' => 'scale',
+                    'label' => ucfirst(str_replace('_', ' ', $matter->type)),
+                    'sub' => ($matter->deal?->listing?->title ?? 'Deal #'.$matter->deal_id).' · '.ucfirst($matter->status),
+                    'url' => route('admin.legal-matters.show', $matter),
                 ];
             }
         }

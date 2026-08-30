@@ -20,6 +20,38 @@
 
         $inputClass = 'w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10';
         $labelClass = 'block text-sm font-semibold text-slate-800';
+
+        $distressReasons = [
+            'default' => __('Defaults / missed payments'),
+            'repossession' => __('Repossession / foreclosure'),
+            'divorce' => __('Divorce / separation'),
+            'relocation' => __('Relocation / job change'),
+            'estate' => __('Inheritance / estate'),
+            'developer' => __('Developer / business exit'),
+            'renovation' => __('Needs full renovation'),
+            'cash_needed' => __('Raising cash'),
+            'over_encumbered' => __('Over-encumbered'),
+        ];
+        $closingPeriods = [
+            'asap' => __('As soon as possible'),
+            '30' => __('Within 30 days'),
+            '60' => __('Within 60 days'),
+            '90' => __('Within 90 days'),
+            'flexible' => __('Flexible'),
+        ];
+        $negotiationLevels = [
+            'very_flexible' => __('Very flexible'),
+            'flexible' => __('Flexible on price'),
+            'moderate' => __('Moderate'),
+            'firm' => __('Firm — close to asking'),
+            'fixed' => __('Fixed / non-negotiable'),
+        ];
+        $sellerType = old('seller_type', $listing?->seller_type ?? 'individual');
+        $expectedMarketValue = old('expected_market_value', $listing?->expected_market_value ?? '');
+        $distressReason = old('reason_for_sale', $listing?->reason_for_sale ?? '');
+        $closingPeriod = old('expected_closing_period', $listing?->expected_closing_period ?? '');
+        $negotiationFlexibility = old('negotiation_flexibility', $listing?->negotiation_flexibility ?? '');
+        $inspectionAccess = old('inspection_access', $listing?->inspection_access ?? '1');
     @endphp
 
     <div class="space-y-6" data-purpose="listing-wizard">
@@ -369,6 +401,67 @@
                                 </div>
                             </div>
                         @endif
+
+                        <div class="border-t border-slate-100 pt-6">
+                            <h3 class="text-sm font-bold text-slate-800">{{ __('Seller & deal intelligence') }}</h3>
+                            <p class="mt-1 text-sm text-slate-600">{{ __('These signals power deal scoring and the secretive-deal benefit.') }}</p>
+                            <div class="mt-4 grid gap-5 md:grid-cols-2">
+                                <div>
+                                    <label class="{{ $labelClass }}" for="seller_type">{{ __('Who is listing?') }}</label>
+                                    <select id="seller_type" class="mt-2 {{ $inputClass }}" name="seller_type">
+                                        <option value="individual" @selected(old('seller_type', $sellerType) === 'individual')>{{ __('Individual homeowner') }}</option>
+                                        <option value="investor" @selected(old('seller_type', $sellerType) === 'investor')>{{ __('Investor / flipper') }}</option>
+                                        <option value="developer" @selected(old('seller_type', $sellerType) === 'developer')>{{ __('Developer / builder') }}</option>
+                                        <option value="institution" @selected(old('seller_type', $sellerType) === 'institution')>{{ __('Institution / bank / REIT') }}</option>
+                                        <option value="poa" @selected(old('seller_type', $sellerType) === 'poa')>{{ __('Power of attorney / mandate') }}</option>
+                                        <option value="estate" @selected(old('seller_type', $sellerType) === 'estate')>{{ __('Estate / executor') }}</option>
+                                        <option value="professional" @selected(old('seller_type', $sellerType) === 'professional')>{{ __('Professional / agency') }}</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="{{ $labelClass }}" for="expected_market_value">{{ __('Expected market value') }}</label>
+                                    <input id="expected_market_value" class="mt-2 {{ $inputClass }}" type="number" min="0" step="0.01"
+                                        name="expected_market_value" value="{{ old('expected_market_value', $expectedMarketValue ?? '') }}"
+                                        placeholder="{{ __('Optional — used to validate the discount') }}">
+                                </div>
+                                <div>
+                                    <label class="{{ $labelClass }}" for="reason_for_sale">{{ __('Reason for sale / distress context') }}</label>
+                                    <select id="reason_for_sale" class="mt-2 {{ $inputClass }}" name="reason_for_sale">
+                                        <option value="">{{ __('Prefer not to say') }}</option>
+                                        @foreach ($distressReasons as $key => $label)
+                                            <option value="{{ $key }}" @selected(old('reason_for_sale', $distressReason) === $key)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="{{ $labelClass }}" for="expected_closing_period">{{ __('Expected closing period') }}</label>
+                                    <select id="expected_closing_period" class="mt-2 {{ $inputClass }}" name="expected_closing_period">
+                                        <option value="">{{ __('Not specified') }}</option>
+                                        @foreach ($closingPeriods as $key => $label)
+                                            <option value="{{ $key }}" @selected(old('expected_closing_period', $closingPeriod) === $key)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="{{ $labelClass }}" for="negotiation_flexibility">{{ __('Negotiation flexibility') }}</label>
+                                    <select id="negotiation_flexibility" class="mt-2 {{ $inputClass }}" name="negotiation_flexibility">
+                                        <option value="">{{ __('Not specified') }}</option>
+                                        @foreach ($negotiationLevels as $key => $label)
+                                            <option value="{{ $key }}" @selected(old('negotiation_flexibility', $negotiationFlexibility) === $key)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="mt-2 flex items-center gap-2.5 text-sm text-slate-700">
+                                        <input type="hidden" name="inspection_access" value="0">
+                                        <input id="inspection_access" type="checkbox" name="inspection_access" value="1"
+                                            @checked((bool) old('inspection_access', $inspectionAccess))
+                                            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                        {{ __('I allow on-site inspections (recommended)') }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Step 4: Media --}}
@@ -402,6 +495,23 @@
                                     @foreach ($listing->floorPlanImages as $floorPlan)
                                         <img class="aspect-[4/3] w-full rounded-lg bg-slate-100 object-contain p-1"
                                             src="{{ $floorPlan->url() }}" alt="" loading="lazy">
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-6">
+                            <label class="{{ $labelClass }}" for="title_documents">{{ __('Title & ownership documents') }}</label>
+                            <p class="mt-1 text-sm text-slate-600">{{ __('Optional but boosts verification. Accepted: PDF, JPG or PNG. Up to 8 files.') }}</p>
+                            <input id="title_documents" class="mt-3 block w-full rounded-lg border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-600 file:me-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
+                                type="file" name="title_documents[]" accept="application/pdf,image/jpeg,image/png" multiple>
+                            @if ($listing?->titleDocuments->isNotEmpty())
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    @foreach ($listing->titleDocuments as $doc)
+                                        <a href="{{ $doc->url() }}" target="_blank" rel="noopener"
+                                            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-indigo-600 hover:border-indigo-400">
+                                            <i class="h-4 w-4" data-lucide="file-text" aria-hidden="true"></i>{{ $doc->filename() }}
+                                        </a>
                                     @endforeach
                                 </div>
                             @endif

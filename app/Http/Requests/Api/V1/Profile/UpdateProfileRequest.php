@@ -26,6 +26,8 @@ class UpdateProfileRequest extends FormRequest
             'language' => ['sometimes', 'string', 'max:10'],
             'currency' => ['sometimes', 'string', 'max:10'],
             'phone_visibility' => ['sometimes', Rule::in(['everyone', 'registered', 'none'])],
+            'buying_for' => ['sometimes', 'nullable', Rule::in(['my_home', 'investment', 'fix_flip', 'development', 'land_banking', 'commercial'])],
+            'is_institutional' => ['sometimes', 'boolean'],
         ];
     }
 

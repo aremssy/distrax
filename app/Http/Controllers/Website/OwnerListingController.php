@@ -12,6 +12,7 @@ use App\Models\ListingPackage;
 use App\Models\PropertyImage;
 use App\Models\PropertyListing;
 use App\Models\Zone;
+use App\Services\ListingIntakeService;
 use App\Services\PostEntitlementService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -75,7 +76,7 @@ class OwnerListingController extends Controller
         ]);
     }
 
-    public function store(StoreListingRequest $request, PostEntitlementService $entitlements): RedirectResponse
+    public function store(StoreListingRequest $request, PostEntitlementService $entitlements, ListingIntakeService $intake): RedirectResponse
     {
         $this->authorize('create', PropertyListing::class);
 
@@ -97,6 +98,8 @@ class OwnerListingController extends Controller
         }
 
         $this->storeUploadedMedia($request, $listing);
+        $intake->applySellerIdentity($request->user(), $request->validated(), $request->file('poa_document'));
+        $intake->storeTitleDocuments($listing, $request->file('title_documents', []), $request->user());
 
         return $isDraft
             ? redirect()->route('owner.listings.edit', $listing)->with('success', 'Draft saved. You can finish and publish it any time.')
@@ -116,7 +119,7 @@ class OwnerListingController extends Controller
         ]);
     }
 
-    public function update(UpdateListingRequest $request, PropertyListing $listing, PostEntitlementService $entitlements): RedirectResponse
+    public function update(UpdateListingRequest $request, PropertyListing $listing, PostEntitlementService $entitlements, ListingIntakeService $intake): RedirectResponse
     {
         $this->authorize('update', $listing);
 
@@ -140,6 +143,8 @@ class OwnerListingController extends Controller
         }
 
         $this->storeUploadedMedia($request, $listing);
+        $intake->applySellerIdentity($request->user(), $request->validated(), $request->file('poa_document'));
+        $intake->storeTitleDocuments($listing, $request->file('title_documents', []), $request->user());
 
         return $listing->status === 'pending' && $listing->wasChanged('status')
             ? redirect()->route('owner.listings.index')->with('success', 'Listing submitted for review.')
@@ -162,7 +167,10 @@ class OwnerListingController extends Controller
      */
     private function listingAttributes(StoreListingRequest|UpdateListingRequest $request): array
     {
-        $data = Arr::except($request->validated(), ['custom_fields', 'images', 'floor_plans']);
+        $data = Arr::except($request->validated(), [
+            'custom_fields', 'images', 'floor_plans',
+            ...ListingIntakeService::NON_LISTING_KEYS,
+        ]);
 
         return array_filter($data, static fn ($value): bool => $value !== null);
     }

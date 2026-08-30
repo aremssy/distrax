@@ -22,6 +22,10 @@ class NotificationDispatcher
         'lead' => 'lead',
         'saved_search_alert' => 'alert',
         'rent_reminder' => 'alert',
+        'price_drop' => 'alert',
+        'new_matched_deal' => 'alert',
+        'disclosure_added' => 'alert',
+        'offer_status_change' => 'offer',
     ];
 
     public function __construct(private SmsSender $sms, private FcmSender $fcm) {}

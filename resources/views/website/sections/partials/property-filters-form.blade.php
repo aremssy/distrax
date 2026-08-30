@@ -61,6 +61,30 @@
         @endforeach
     </div>
 
+    <div>
+        <label class="mb-2 block text-sm font-semibold text-slate-800 dark:text-white" for="verification_status">Verification status</label>
+        <select id="verification_status" name="verification_status" class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+            <option value="">Any status</option>
+            <option value="distrax_verified" @selected(($filters['verification_status'] ?? null) === 'distrax_verified')>Distrax Verified</option>
+            <option value="disclosure_required" @selected(($filters['verification_status'] ?? null) === 'disclosure_required')>Verified — Disclosure Required</option>
+            <option value="in_progress" @selected(($filters['verification_status'] ?? null) === 'in_progress')>Verification in Progress</option>
+            <option value="under_legal_review" @selected(($filters['verification_status'] ?? null) === 'under_legal_review')>Under Legal Review</option>
+            <option value="not_verified" @selected(($filters['verification_status'] ?? null) === 'not_verified')>Not Verified</option>
+        </select>
+    </div>
+
+    <div>
+        <label class="mb-2 block text-sm font-semibold text-slate-800 dark:text-white" for="deal_tag">Deal type</label>
+        <select id="deal_tag" name="deal_tag" class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+            <option value="">Any deal</option>
+            <option value="urgent_sale" @selected(($filters['deal_tag'] ?? null) === 'urgent_sale')>Urgent sale</option>
+            <option value="below_market_value" @selected(($filters['deal_tag'] ?? null) === 'below_market_value')>Below market value</option>
+            <option value="bank_institutional_asset" @selected(($filters['deal_tag'] ?? null) === 'bank_institutional_asset')>Bank / institutional asset</option>
+            <option value="estate_sale" @selected(($filters['deal_tag'] ?? null) === 'estate_sale')>Estate sale</option>
+            <option value="owner_distress" @selected(($filters['deal_tag'] ?? null) === 'owner_distress')>Owner distress</option>
+        </select>
+    </div>
+
     <div class="flex gap-3 pt-2">
         <button class="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700" type="submit">Apply filters</button>
         <a class="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"

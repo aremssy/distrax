@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-#[Fillable(['user_id', 'payable_type', 'payable_id', 'property_listing_id', 'gateway', 'amount', 'currency', 'gateway_fee', 'status', 'transaction_ref', 'gateway_ref', 'gateway_response', 'coupon_id', 'discount_amount', 'paid_at'])]
+#[Fillable(['user_id', 'payable_type', 'payable_id', 'property_listing_id', 'gateway', 'amount', 'currency', 'gateway_fee', 'status', 'transaction_ref', 'gateway_ref', 'gateway_response', 'coupon_id', 'discount_amount', 'paid_at', 'purpose'])]
 class Payment extends Model
 {
     protected function casts(): array

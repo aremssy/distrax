@@ -17,6 +17,7 @@ use App\Models\PropertyListing;
 use App\Models\PropertyVideo;
 use App\Models\Zone;
 use App\Services\DistanceService;
+use App\Services\ListingIntakeService;
 use App\Services\NearbyAmenitiesService;
 use App\Services\PostEntitlementService;
 use App\Services\TranslationService;
@@ -55,6 +56,8 @@ class ListingController extends ApiController
             'advance_months' => ['sometimes', 'integer', 'min:0'],
             'featured' => ['sometimes', 'boolean'],
             'verified' => ['sometimes', 'boolean'],
+            'verification_status' => ['sometimes', Rule::in(['in_progress', 'distrax_verified', 'disclosure_required', 'under_legal_review', 'not_verified'])],
+            'deal_tag' => ['sometimes', Rule::in(['urgent_sale', 'below_market_value', 'bank_institutional_asset', 'estate_sale', 'owner_distress'])],
             'keyword' => ['sometimes', 'string', 'max:200'],
             'sort' => ['sometimes', Rule::in(['newest', 'price_asc', 'price_desc'])],
             'sw_lat' => ['sometimes', 'numeric', 'between:-90,90', 'required_with:sw_lng,ne_lat,ne_lng'],
@@ -106,6 +109,12 @@ class ListingController extends ApiController
         }
         if ($request->boolean('verified')) {
             $query->where('is_verified', true);
+        }
+        if ($verificationStatus = $request->input('verification_status')) {
+            $query->verificationStatus($verificationStatus);
+        }
+        if ($dealTag = $request->input('deal_tag')) {
+            $query->dealTag($dealTag);
         }
 
         // Price range
@@ -292,6 +301,9 @@ class ListingController extends ApiController
                 'videos',
                 'customFieldValues.field',
                 'reviews' => fn ($q) => $q->with('reviewer')->where('is_visible', true)->latest()->limit(10),
+                'verificationCase',
+                'disclosures',
+                'documents',
             ]);
 
         // Authenticated owner may view their own listing at any status
@@ -327,7 +339,7 @@ class ListingController extends ApiController
      *
      * Create a new listing. Enforces post-limit guard before creation.
      */
-    public function store(StoreListingRequest $request, PostEntitlementService $entitlements): JsonResponse
+    public function store(StoreListingRequest $request, PostEntitlementService $entitlements, ListingIntakeService $intake): JsonResponse
     {
         $user = $request->user();
 
@@ -350,6 +362,9 @@ class ListingController extends ApiController
         $validated = $request->validated();
         $customFields = $validated['custom_fields'] ?? [];
         unset($validated['custom_fields']);
+        $titleDocuments = $request->file('title_documents', []);
+        $poaDocument = $request->file('poa_document');
+        $validated = array_diff_key($validated, array_flip(ListingIntakeService::NON_LISTING_KEYS));
 
         $listing = PropertyListing::create(array_merge($validated, [
             'owner_id' => $user->id,
@@ -358,6 +373,8 @@ class ListingController extends ApiController
         ]));
 
         $this->syncCustomFields($listing, $customFields);
+        $intake->applySellerIdentity($user, $request->validated(), $poaDocument);
+        $intake->storeTitleDocuments($listing, $titleDocuments, $user);
 
         $listing->load(['zone', 'owner', 'agency', 'images', 'videos', 'customFieldValues.field']);
 
@@ -367,19 +384,25 @@ class ListingController extends ApiController
     /**
      * PUT /api/v1/listings/{listing}
      */
-    public function update(UpdateListingRequest $request, PropertyListing $listing): JsonResponse
+    public function update(UpdateListingRequest $request, PropertyListing $listing, ListingIntakeService $intake): JsonResponse
     {
         $this->authorize('update', $listing);
 
         $validated = $request->validated();
         $customFields = $validated['custom_fields'] ?? null;
         unset($validated['custom_fields']);
+        $titleDocuments = $request->file('title_documents', []);
+        $poaDocument = $request->file('poa_document');
+        $validated = array_diff_key($validated, array_flip(ListingIntakeService::NON_LISTING_KEYS));
 
         $listing->update($validated);
 
         if ($customFields !== null) {
             $this->syncCustomFields($listing, $customFields);
         }
+
+        $intake->applySellerIdentity($request->user(), $request->validated(), $poaDocument);
+        $intake->storeTitleDocuments($listing, $titleDocuments, $request->user());
 
         $listing->load(['zone', 'owner', 'agency', 'images', 'videos', 'customFieldValues.field']);
 

@@ -74,7 +74,43 @@ class SavedSearchMatcherService
             return false;
         }
 
+        // Deal radar: the property must clear the requested deal-score floor.
+        if (isset($criteria['min_deal_score'])) {
+            $score = $listing->deal_score_cached;
+            if (! is_numeric($score) || (float) $score < (float) $criteria['min_deal_score']) {
+                return false;
+            }
+        }
+
+        // Deal radar: the property must be discounted at least this much vs market value.
+        if (isset($criteria['min_discount_pct'])) {
+            $discount = $this->discountPctFor($listing);
+            if ($discount === null || $discount < (float) $criteria['min_discount_pct']) {
+                return false;
+            }
+        }
+
         return true;
+    }
+
+    /**
+     * Percentage discount of current asking price vs the latest estimated value,
+     * or null when no valuation is available.
+     */
+    public function discountPctFor(PropertyListing $listing): ?float
+    {
+        $latest = $listing->valuations()->latest('id')->first();
+
+        if (! $latest || empty($latest->estimated_value)) {
+            return null;
+        }
+
+        $market = (float) $latest->estimated_value;
+        if ($market <= 0) {
+            return null;
+        }
+
+        return round((($market - (float) $listing->price) / $market) * 100, 2);
     }
 
     private function zoneMatches(PropertyListing $listing, int $zoneId, bool $includeChildren): bool

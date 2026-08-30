@@ -19,6 +19,12 @@ class UpdateSavedSearchRequest extends FormRequest
             'name' => ['sometimes', 'nullable', 'string', 'max:100'],
             'alert_on' => ['sometimes', 'boolean'],
 
+            // Deal radar (mandate) settings
+            'is_mandate' => ['sometimes', 'boolean'],
+            'min_discount_pct' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
+            'min_deal_score' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
+            'frequency' => ['sometimes', 'nullable', Rule::in(['instant', 'daily', 'weekly'])],
+
             'criteria' => ['sometimes', 'array'],
             'criteria.zone_id' => ['sometimes', 'integer', 'exists:zones,id'],
             'criteria.include_children' => ['sometimes', 'boolean'],

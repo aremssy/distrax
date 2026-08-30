@@ -26,10 +26,8 @@
                 <span class="rounded-full bg-slate-950/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white backdrop-blur">
                     {{ $listing->type === 'sale' ? 'For sale' : ucfirst($listing->type) }}
                 </span>
-                @if ($listing->is_verified)
-                    <span class="flex items-center gap-1 rounded-full bg-emerald-500/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white backdrop-blur">
-                        <i class="h-3 w-3" data-lucide="badge-check" aria-hidden="true"></i>Verified
-                    </span>
+                @if ($listing->relationLoaded('verificationCase') ? $listing->verificationCase : $listing->is_verified)
+                    <x-verification-badge :status="$listing->verificationCase?->status ?? ($listing->is_verified ? 'distrax_verified' : 'in_progress')" />
                 @endif
             </div>
             @auth

@@ -54,7 +54,17 @@ class MatchSavedSearchesJob implements ShouldQueueAfterCommit
                         continue;
                     }
 
-                    if (! $matcher->matches($listing, $search->criteria)) {
+                    $criteria = (array) $search->criteria;
+
+                    // Deal-radar floors live on the search row rather than in criteria.
+                    if (is_numeric($search->min_deal_score)) {
+                        $criteria['min_deal_score'] = (float) $search->min_deal_score;
+                    }
+                    if (is_numeric($search->min_discount_pct)) {
+                        $criteria['min_discount_pct'] = (float) $search->min_discount_pct;
+                    }
+
+                    if (! $matcher->matches($listing, $criteria)) {
                         continue;
                     }
 

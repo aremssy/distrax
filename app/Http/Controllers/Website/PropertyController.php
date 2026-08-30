@@ -12,6 +12,7 @@ use App\Services\NearbyAmenitiesService;
 use App\Services\Payment\GatewayFactory;
 use App\Services\PointInPolygon;
 use App\Services\SchemaMarkupService;
+use App\Services\ValuationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -64,12 +65,24 @@ class PropertyController extends Controller
                 'videos:id,property_listing_id,url,source,thumbnail,sort_order',
                 'customFieldValues.field',
                 'reviews' => fn ($query) => $query->with('reviewer:id,name,avatar')->where('is_visible', true)->latest()->limit(6),
+                'verificationCase.scores',
+                'disclosures',
+                'dealScores' => fn ($query) => $query->latest('computed_at')->limit(1),
+                'valuations' => fn ($query) => $query->latest('valued_at')->limit(1),
+                'riskAssessments',
+                'comparableProperties' => fn ($query) => $query->orderByDesc('similarity_score')->limit(6),
+                'priceHistory',
+                'timelineEvents',
             ])
             ->withCount(['reviews' => fn ($query) => $query->where('is_visible', true)])
             ->withAvg(['reviews' => fn ($query) => $query->where('is_visible', true)], 'rating')
             ->where('status', 'active')
             ->where('slug', $property)
             ->firstOrFail();
+
+        // Build the intelligence snapshot (valuation, comparables, risk, Deal Score)
+        // lazily on first view so pages don't pay for analysis until one is needed.
+        $this->ensureIntelligence($listing);
 
         // Defer the view-count write until after the response is flushed so a
         // hot listing's UPDATE never sits on the read path (row-lock contention).
@@ -97,8 +110,47 @@ class PropertyController extends Controller
             : null;
         $nearby = $listing->lat && $listing->lng ? $nearbyAmenities->near((float) $listing->lat, (float) $listing->lng) : [];
         $activeGateways = $gateways->activeGateways();
+        $isOwner = auth()->check() && auth()->id() === $listing->owner_id;
+        $documents = $isOwner ? $listing->documents()->get() : collect();
 
-        return view('website.pages.property_details', compact('listing', 'similarListings', 'schema', 'isFavorited', 'isCompared', 'nearby', 'ownerBlock', 'activeGateways'));
+        $dealScore = $listing->dealScores->first();
+        $valuation = $listing->valuations->first();
+        $marketValue = $valuation?->estimated_value;
+        $discountPct = app(ValuationService::class)->discountPct($listing, $marketValue);
+        $riskAssessments = $listing->riskAssessments;
+        $comparables = $listing->comparableProperties;
+        $priceHistory = $listing->priceHistory;
+        $timelineEvents = $listing->timelineEvents;
+
+        $owner = $listing->owner;
+        $sellerReputation = $owner ? app(\App\Services\SellerReputationService::class)->statsFor($owner) : null;
+
+        return view('website.pages.property_details', compact(
+            'listing', 'similarListings', 'schema', 'isFavorited', 'isCompared', 'nearby',
+            'ownerBlock', 'activeGateways', 'isOwner', 'documents',
+            'dealScore', 'valuation', 'marketValue', 'discountPct',
+            'riskAssessments', 'comparables', 'priceHistory', 'timelineEvents',
+            'owner', 'sellerReputation',
+        ));
+    }
+
+    /**
+     * Build the intelligence snapshot (valuation, comparables, risk, Deal Score) the
+     * first time a listing is viewed. Subsequent views reuse the stored snapshot.
+     */
+    private function ensureIntelligence(PropertyListing $listing): void
+    {
+        if ($listing->dealScores()->exists()) {
+            return;
+        }
+
+        app(\App\Services\IntelligenceService::class)->analyze($listing);
+        $listing->load([
+            'dealScores' => fn ($query) => $query->latest('computed_at')->limit(1),
+            'valuations' => fn ($query) => $query->latest('valued_at')->limit(1),
+            'riskAssessments',
+            'comparableProperties' => fn ($query) => $query->orderByDesc('similarity_score')->limit(6),
+        ]);
     }
 
     /** Permanently redirect a legacy numeric-ID URL to its canonical slug URL. */
@@ -159,6 +211,8 @@ class PropertyController extends Controller
             ->when(isset($filters['advance_months']), fn (Builder $query) => $query->where('advance_months', '<=', $filters['advance_months']))
             ->when($filters['featured'] ?? false, fn (Builder $query) => $query->where('is_featured', true))
             ->when($filters['verified'] ?? false, fn (Builder $query) => $query->where('is_verified', true))
+            ->when($filters['verification_status'] ?? null, fn (Builder $query, string $status) => $query->verificationStatus($status))
+            ->when($filters['deal_tag'] ?? null, fn (Builder $query, string $tag) => $query->dealTag($tag))
             ->when($filters['keyword'] ?? null, function (Builder $query, string $keyword): void {
                 $search = '%'.addcslashes($keyword, '%_\\').'%';
                 $query->where(fn (Builder $query) => $query
@@ -241,6 +295,7 @@ class PropertyController extends Controller
             'price_asc' => $query->orderBy('price')->orderByDesc('id'),
             'price_desc' => $query->orderByDesc('price')->orderByDesc('id'),
             'rating' => $query->orderByDesc('reviews_avg_rating')->orderByDesc('id'),
+            'deal_score' => $query->orderByDesc('deal_score_cached')->orderByDesc('id'),
             'distance' => $nearLat !== null && $nearLng !== null
                 ? $query->orderByRaw(
                     '(POW(lat - ?, 2) + POW(lng - ?, 2)) ASC',

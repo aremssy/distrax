@@ -91,10 +91,14 @@
         // conditional entries drop out when the listing has no data for them.
         $navSections = collect([
             ['id' => 'overview', 'label' => __('Overview'), 'when' => true],
+            ['id' => 'verification', 'label' => __('Verification'), 'when' => true],
+            ['id' => 'deal-analysis', 'label' => __('Deal Analysis'), 'when' => $dealScore || $valuation || $comparables->isNotEmpty()],
+            ['id' => 'risk-snapshot', 'label' => __('Risk'), 'when' => $riskAssessments->isNotEmpty()],
             ['id' => 'description', 'label' => __('Description'), 'when' => true],
             ['id' => 'details', 'label' => __('Details'), 'when' => true],
             ['id' => 'amenities', 'label' => __('Amenities'), 'when' => $amenities->isNotEmpty()],
             ['id' => 'location', 'label' => __('Location'), 'when' => (bool) ($listing->lat && $listing->lng)],
+            ['id' => 'comparables', 'label' => __('Comparables'), 'when' => $comparables->isNotEmpty()],
             ['id' => 'reviews', 'label' => __('Reviews'), 'when' => true],
         ])->filter(fn (array $section): bool => $section['when'])->values();
     @endphp
@@ -185,11 +189,7 @@
                             <span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-indigo-600">
                                 {{ $purposeLabels[$listing->type] ?? ucfirst($listing->type) }}
                             </span>
-                            @if ($listing->owner?->verification_status === 'verified' || $listing->agency?->is_verified || $listing->is_verified)
-                                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
-                                    <i class="h-3.5 w-3.5" data-lucide="badge-check" aria-hidden="true"></i>{{ __('Verified') }}
-                                </span>
-                            @endif
+                            <x-verification-badge :status="$listing->verificationCase?->status ?? 'in_progress'" />
                         </div>
                         <h1 class="mt-3 text-2xl font-bold leading-snug tracking-tight text-slate-950">{{ $listing->title }}</h1>
                         <p class="mt-2 flex items-center gap-1.5 text-sm text-slate-600">
@@ -247,6 +247,360 @@
                             <p class="mt-4 text-sm text-slate-600">{{ __('No highlights specified for this property.') }}</p>
                         @endif
                     </section>
+
+                    {{-- Verification & Disclosures --}}
+                    <section id="verification" class="scroll-mt-32 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                        <header class="flex items-center gap-2.5">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                                <i class="h-4.5 w-4.5" data-lucide="shield-check" aria-hidden="true"></i>
+                            </span>
+                            <h2 class="text-lg font-bold text-slate-950">{{ __('Verification & Disclosures') }}</h2>
+                        </header>
+
+                        <div class="mt-4 flex flex-wrap items-center gap-3">
+                            <x-verification-badge :status="$listing->verificationCase?->status ?? 'in_progress'" />
+                            @if ($listing->verificationCase?->scores->last())
+                                <a href="{{ route('verify.show', $listing->verificationCase->scores->last()->reference_id) }}"
+                                   class="text-sm font-semibold text-indigo-600 hover:underline">{{ __('View verification passport') }}</a>
+                            @endif
+                        </div>
+
+                        @php
+                            $saleReason = match ($listing->distress_reason_visibility) {
+                                'public' => $listing->distress_reason_category,
+                                'disclosure_only' => auth()->check() ? $listing->distress_reason_category : null,
+                                default => null,
+                            };
+                        @endphp
+                        @if ($saleReason)
+                            <p class="mt-4 text-sm text-slate-600">
+                                <span class="font-semibold text-slate-800">{{ __('Reason for sale') }}:</span> {{ ucwords(str_replace('_', ' ', $saleReason)) }}
+                            </p>
+                        @endif
+
+                        @if ($listing->disclosures->isNotEmpty())
+                            <div class="mt-5">
+                                <h3 class="text-sm font-bold text-slate-800">{{ __('Disclosures') }}</h3>
+                                <ul class="mt-2 space-y-2">
+                                    @foreach ($listing->disclosures as $disclosure)
+                                        <li class="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                                            <span class="font-semibold">{{ ucwords(str_replace('_', ' ', $disclosure->category)) }}:</span> {{ $disclosure->description }}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        @if ($isOwner && $documents->isNotEmpty())
+                            <div class="mt-5">
+                                <h3 class="text-sm font-bold text-slate-800">{{ __('Document Vault (owner only)') }}</h3>
+                                <ul class="mt-2 space-y-1 text-sm text-slate-600">
+                                    @foreach ($documents as $document)
+                                        <li>{{ ucwords(str_replace('_', ' ', $document->type)) }} &mdash; {{ $document->is_verified ? __('Verified') : __('Pending review') }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </section>
+
+                    {{-- ── Deal Score & market price block (blueprint 3.6) ─────────── --}}
+                    @if ($dealScore || $marketValue)
+                    <section aria-label="Deal Score and price analysis" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                        @if ($dealScore)
+                            <div class="flex flex-wrap items-start justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ __('Distrax Deal Score') }}</p>
+                                    <p class="mt-1 text-sm text-slate-600">
+                                        <span class="text-3xl font-extrabold text-slate-950">{{ $dealScore->score }}<span class="text-lg text-slate-400">/100</span></span>
+                                        <span class="ml-2 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-600">
+                                            {{ ucwords(str_replace('_', ' ', $dealScore->breakdown['label'] ?? '')) }}
+                                        </span>
+                                    </p>
+                                </div>
+                                <details class="w-full sm:w-auto">
+                                    <summary class="cursor-pointer text-sm font-semibold text-indigo-600 hover:underline">{{ __('How this score is built') }}</summary>
+                                    <dl class="mt-3 space-y-1.5 text-sm">
+                                        @foreach (($dealScore->breakdown['component_labels'] ?? \App\Services\DealScoreService::COMPONENTS_UI) as $key => $label)
+                                            @isset($dealScore->breakdown[$key])
+                                                <div class="flex items-center justify-between gap-4">
+                                                    <dt class="text-slate-600">{{ $label }}</dt>
+                                                    <dd class="font-semibold text-slate-800">{{ $dealScore->breakdown[$key] }}<span class="text-xs text-slate-400">/100</span></dd>
+                                                </div>
+                                            @endisset
+                                        @endforeach
+                                    </dl>
+                                    <p class="mt-3 text-xs text-slate-400">{{ __('Deal Score is an estimate generated by Distrax, not a guarantee of outcome.') }}</p>
+                                </details>
+                            </div>
+                        @endif
+
+                        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            <div class="rounded-xl bg-slate-50 px-4 py-3">
+                                <p class="text-xs text-slate-500">{{ __('Asking price') }}</p>
+                                <p class="text-lg font-bold text-slate-950">{{ number_format($listing->price) }} {{ $listing->currency_code }}</p>
+                            </div>
+                            @if ($marketValue)
+                                <div class="rounded-xl bg-slate-50 px-4 py-3">
+                                    <p class="text-xs text-slate-500">{{ __('Estimated market value') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></p>
+                                    <p class="text-lg font-bold text-slate-950">{{ number_format($marketValue) }} {{ $listing->currency_code }}</p>
+                                </div>
+                            @endif
+                            @if ($discountPct !== null)
+                                <div class="rounded-xl bg-emerald-50 px-4 py-3">
+                                    <p class="text-xs text-slate-500">{{ __('Discount vs market') }}</p>
+                                    <p class="text-lg font-bold {{ $discountPct >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
+                                        {{ $discountPct >= 0 ? '−' : '+' }}{{ number_format(abs($discountPct), 1) }}%
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
+
+                        @if ($listing->expected_closing_period || $listing->negotiation_flexibility)
+                            <div class="mt-4 flex flex-wrap gap-2 text-sm">
+                                @if ($listing->expected_closing_period)
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                                        <i class="h-3.5 w-3.5" data-lucide="clock" aria-hidden="true"></i>
+                                        {{ __('Closing') }}: {{ ucwords(str_replace('_', ' ', $listing->expected_closing_period)) }}
+                                    </span>
+                                @endif
+                                @if ($listing->negotiation_flexibility)
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                                        <i class="h-3.5 w-3.5" data-lucide="handshake" aria-hidden="true"></i>
+                                        {{ __('Negotiation') }}: {{ ucwords(str_replace('_', ' ', $listing->negotiation_flexibility)) }}
+                                    </span>
+                                @endif
+                            </div>
+                        @endif
+                    </section>
+                    @endif
+
+                    {{-- ── Deal Analysis (blueprint 3.8) ─────────────────────────── --}}
+                    @if ($dealScore || $valuation || $comparables->isNotEmpty())
+                    <section id="deal-analysis" class="scroll-mt-32 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                        <header class="flex items-center gap-2.5">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                                <i class="h-4.5 w-4.5" data-lucide="chart-line" aria-hidden="true"></i>
+                            </span>
+                            <h2 class="text-lg font-bold text-slate-950">{{ __('Deal Analysis') }}</h2>
+                            @if ($valuation?->confidence_score !== null)
+                                <span class="ml-auto text-xs font-semibold uppercase tracking-wide text-amber-600">
+                                    {{ __('Confidence') }}: {{ $valuation->confidence_score }}%
+                                </span>
+                            @endif
+                        </header>
+
+                        @php
+                            $pricePerSqm = null;
+                            if ($listing->price > 0 && $listing->area_sqft > 0) {
+                                $pricePerSqm = round($listing->price / ($listing->area_sqft / 10.7639));
+                            }
+                            $recentReduction = $listing->priceHistory
+                                ->filter(fn ($h) => $h->old_price !== null && $h->new_price < $h->old_price)
+                                ->isNotEmpty();
+                        @endphp
+
+                        <dl class="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+                            <div class="rounded-xl bg-slate-50 px-4 py-3">
+                                <dt class="text-xs text-slate-500">{{ __('Asking price') }}</dt>
+                                <dd class="mt-1 font-bold text-slate-950">{{ number_format($listing->price) }}</dd>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 px-4 py-3">
+                                <dt class="text-xs text-slate-500">{{ __('Est. market value') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></dt>
+                                <dd class="mt-1 font-bold text-slate-950">{{ $marketValue ? number_format($marketValue) : __('Not available') }}</dd>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 px-4 py-3">
+                                <dt class="text-xs text-slate-500">{{ __('Price per m²') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></dt>
+                                <dd class="mt-1 font-bold text-slate-950">{{ $pricePerSqm ? number_format($pricePerSqm) : __('Not available') }}</dd>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 px-4 py-3">
+                                <dt class="text-xs text-slate-500">{{ __('Discount / premium') }}</dt>
+                                <dd class="mt-1 font-bold {{ ($discountPct ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
+                                    {{ $discountPct !== null ? number_format($discountPct, 1).'%' : __('Not available') }}
+                                </dd>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 px-4 py-3">
+                                <dt class="text-xs text-slate-500">{{ __('Est. acquisition cost') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></dt>
+                                <dd class="mt-1 font-bold text-slate-950">{{ number_format($listing->price) }}</dd>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 px-4 py-3">
+                                <dt class="text-xs text-slate-500">{{ __('Recent price reduction') }}</dt>
+                                <dd class="mt-1 font-bold {{ $recentReduction ? 'text-emerald-600' : 'text-slate-950' }}">{{ $recentReduction ? __('Yes') : ($listing->priceHistory->isNotEmpty() ? __('No') : __('Not available')) }}</dd>
+                            </div>
+                        </dl>
+                        <p class="mt-4 text-xs text-slate-400">{{ __('All model-generated figures are estimates with a confidence level — never presented as fact.') }}</p>
+                    </section>
+                    @endif
+
+                    {{-- ── Risk Snapshot (blueprint 3.8) ──────────────────────────── --}}
+                    @if ($riskAssessments->isNotEmpty())
+                    <section id="risk-snapshot" class="scroll-mt-32 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                        <header class="flex items-center gap-2.5">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
+                                <i class="h-4.5 w-4.5" data-lucide="shield-alert" aria-hidden="true"></i>
+                            </span>
+                            <h2 class="text-lg font-bold text-slate-950">{{ __('Risk Snapshot') }}</h2>
+                        </header>
+                        <div class="mt-5 space-y-2">
+                            @foreach ($riskAssessments as $risk)
+                                <details class="group rounded-xl border border-slate-200 px-4 py-3">
+                                    <summary class="flex cursor-pointer items-center justify-between text-sm font-semibold">
+                                        <span class="flex items-center gap-2">
+                                            <span class="inline-block h-2.5 w-2.5 rounded-full {{ $risk->level === 'high' ? 'bg-rose-500' : ($risk->level === 'medium' ? 'bg-amber-400' : 'bg-emerald-500') }}"></span>
+                                            {{ ucwords(str_replace('_', ' ', $risk->risk_area)) }}
+                                        </span>
+                                        <span class="uppercase {{ $risk->level === 'high' ? 'text-rose-600' : ($risk->level === 'medium' ? 'text-amber-600' : 'text-emerald-600') }}">{{ $risk->level }}</span>
+                                    </summary>
+                                    <p class="mt-2 text-sm text-slate-600">{{ $risk->why_explanation }}</p>
+                                    @if ($risk->evidence_ref_id)
+                                        <a href="#document-vault" class="mt-1 inline-block text-xs font-semibold text-indigo-600 hover:underline">Evidence: {{ $risk->evidence_ref_id }}</a>
+                                    @endif
+                                </details>
+                            @endforeach
+                        </div>
+                    </section>
+                    @endif
+
+                    {{-- ── Investment Potential (blueprint 3.9) ───────────────────── --}}
+                    @if (auth()->check() && $listing->price > 0)
+                    <section id="investment-potential" class="scroll-mt-32 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                        <header class="flex items-center gap-2.5">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
+                                <i class="h-4.5 w-4.5" data-lucide="trending-up" aria-hidden="true"></i>
+                            </span>
+                            <h2 class="text-lg font-bold text-slate-950">{{ __('Investment Potential') }}</h2>
+                        </header>
+                        <p class="mt-4 text-sm text-slate-500">{{ __('Investment figures are estimates to support your own underwriting — not investment advice. Use the tool above to adjust your own assumptions.') }}</p>
+                        <p class="mt-2 text-sm text-slate-500">{{ __('Use a calculator to model yield, flip margin, or development returns. These change per your own inputs, which are saved to your account.') }}</p>
+                    </section>
+                    @endif
+
+                    {{-- ── Price History & Timeline (blueprint 3.10) ──────────────── --}}
+                    @if ($priceHistory->isNotEmpty() || $timelineEvents->isNotEmpty())
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                        <header class="flex items-center gap-2.5">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                                <i class="h-4.5 w-4.5" data-lucide="history" aria-hidden="true"></i>
+                            </span>
+                            <h2 class="text-lg font-bold text-slate-950">{{ __('Price History & Timeline') }}</h2>
+                        </header>
+
+                        @if ($priceHistory->isNotEmpty())
+                            <h3 class="mt-5 text-sm font-bold text-slate-800">{{ __('Price history') }}</h3>
+                            <ul class="mt-2 space-y-1.5 text-sm text-slate-600">
+                                @foreach ($priceHistory->reverse() as $entry)
+                                    <li class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                                        <span>{{ $entry->changed_at->format('M Y') }}</span>
+                                        <span><span class="line-through text-slate-400">{{ number_format($entry->old_price) }}</span> → <span class="font-semibold text-slate-800">{{ number_format($entry->new_price) }}</span></span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        @if ($timelineEvents->isNotEmpty())
+                            <h3 class="mt-5 text-sm font-bold text-slate-800">{{ __('Property timeline') }}</h3>
+                            <ol class="mt-3 space-y-3 border-slate-200">
+                                @foreach ($timelineEvents->filter(fn ($e) => $e->privacy_level !== 'internal')->reverse() as $event)
+                                    <li class="relative flex gap-3 text-sm">
+                                        <span class="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-indigo-400"></span>
+                                        <div>
+                                            <p class="font-semibold text-slate-800">{{ ucwords(str_replace('_', ' ', $event->event_type)) }}</p>
+                                            @if ($event->description)<p class="text-slate-600">{{ $event->description }}</p>@endif
+                                            <p class="text-xs text-slate-400">{{ $event->occurred_at->format('M j, Y') }}</p>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ol>
+                        @endif
+                    </section>
+                    @endif
+
+                    {{-- ── Ask Distrax AI (blueprint 3.17) ─────────────────────── --}}
+                    <section class="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/60 to-violet-50/40 p-6 shadow-sm dark:border-night-700 dark:from-night-900 dark:to-night-900 sm:p-7">
+                        <header class="flex items-center gap-2.5">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-night-800">
+                                <i class="h-4.5 w-4.5" data-lucide="sparkles" aria-hidden="true"></i>
+                            </span>
+                            <h2 class="text-lg font-bold text-slate-950">{{ __('Ask Distrax AI') }}</h2>
+                        </header>
+                        <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                            {{ __('Ask about this specific property. Distrax answers only from this property\'s verified data — it will say "not available" rather than guess.') }}
+                        </p>
+
+                        @if (session('ask_distrax'))
+                            <div class="mt-4 rounded-xl border border-indigo-200 bg-white p-4 text-sm leading-6 text-slate-700 dark:border-night-700 dark:bg-night-800 dark:text-slate-200">
+                                <div class="mb-2 flex items-center gap-2">
+                                    <span class="rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-600 dark:bg-night-700">
+                                        {{ __(str_replace('_', ' ', session('ask_distrax.answer_type'))) }}
+                                    </span>
+                                </div>
+                                <div class="space-y-1 whitespace-pre-line">{!! e(session('ask_distrax.answer')) !!}</div>
+                                <button type="button" @click="this.closest('div').remove()"
+                                    class="mt-2 text-xs font-medium text-slate-400 hover:text-slate-600">{{ __('Dismiss') }}</button>
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('properties.ask-distrax', $listing) }}" class="mt-4 flex flex-col gap-3 sm:flex-row">
+                            @csrf
+                            <label class="sr-only" for="ask-distrax-question">{{ __('Your question') }}</label>
+                            <input id="ask-distrax-question" type="text" name="question" maxlength="1000" required
+                                placeholder="{{ __('e.g. Why is this a deal? What are the disclosed risks?') }}"
+                                class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand/50 focus:outline-none dark:border-night-700 dark:bg-night-800 dark:text-slate-200">
+                            <button type="submit" class="shrink-0 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">Ask</button>
+                        </form>
+                        <p class="mt-2 text-[11px] text-slate-400">{{ __('Every query is logged for quality review. Answers are informational, not professional advice.') }}</p>
+                    </section>
+
+                    {{-- ── Comparable Properties (blueprint 3.10) ─────────────────── --}}
+                    @if ($comparables->isNotEmpty())
+                    <section id="comparables" class="scroll-mt-32 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                        <header class="flex items-center gap-2.5">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+                                <i class="h-4.5 w-4.5" data-lucide="scale" aria-hidden="true"></i>
+                            </span>
+                            <h2 class="text-lg font-bold text-slate-950">{{ __('Comparable Properties') }}</h2>
+                        </header>
+                        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            @foreach ($comparables->take(6) as $comparable)
+                                <a href="{{ $comparable->listing ? route('properties.show', $comparable->listing) : '#' }}"
+                                    class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm transition hover:bg-slate-50">
+                                    <div>
+                                        <p class="font-semibold text-slate-800">{{ number_format($comparable->sale_price) }}</p>
+                                        @if ($comparable->distance_km !== null)
+                                            <p class="text-xs text-slate-500">{{ number_format($comparable->distance_km, 1) }} km away</p>
+                                        @endif
+                                    </div>
+                                    <span class="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-600">{{ $comparable->similarity_score }}% match</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </section>
+                    @endif
+
+                    {{-- ── Decision Summary (blueprint 3.6, clearly labelled) ─────── --}}
+                    @if ($dealScore || $riskAssessments->isNotEmpty())
+                    <section aria-label="Decision summary" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                        <header class="flex items-center gap-2.5">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                                <i class="h-4.5 w-4.5" data-lucide="scroll-text" aria-hidden="true"></i>
+                            </span>
+                            <h2 class="text-lg font-bold text-slate-950">{{ __('Decision Summary') }}</h2>
+                        </header>
+                        <p class="mt-3 text-sm text-slate-600">
+                            {{ __('This summary is generated by Distrax from the property\u2019s stored records. It is not financial or legal advice.') }}
+                        </p>
+                        <ul class="mt-3 space-y-2 text-sm text-slate-700">
+                            @if ($dealScore)
+                                <li>- {{ __('Deal Score of :score/100 placed this property :label.', ['score' => $dealScore->score, 'label' => ucwords(str_replace('_', ' ', $dealScore->breakdown['label'] ?? ''))]) }}</li>
+                            @endif
+                            @if ($discountPct !== null)
+                                <li>- {{ __('Priced :pct off the estimated market value.', ['pct' => number_format(abs($discountPct), 1).'%']) }}</li>
+                            @endif
+                            @if ($highRisks = $riskAssessments->where('level', 'high')->count())
+                                <li>- {{ trans_choice(':count high-risk area(s) identified — review the Risk Snapshot.', $highRisks, ['count' => $highRisks]) }}</li>
+                            @endif
+                        </ul>
+                    </section>
+                    @endif
 
                     {{-- Description --}}
                     <section id="description" class="scroll-mt-32 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
@@ -737,6 +1091,18 @@
                                 class="flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-200 px-4 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50">
                                 <i class="h-4 w-4" data-lucide="calendar" aria-hidden="true"></i>{{ __('Schedule a Visit') }}
                             </a>
+                            @if (auth()->check() && $listing->owner_id && $listing->owner_id !== auth()->id() && $listing->status === 'active')
+                                <a href="{{ route('offers.create', $listing) }}"
+                                    class="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                                    <i class="h-4 w-4" data-lucide="hand-coins" aria-hidden="true"></i>{{ __('Make an Offer') }}
+                                </a>
+                            @endif
+                            @if (auth()->check() && $listing->owner_id && $listing->owner_id !== auth()->id())
+                                <a href="{{ route('inspections.create', $listing) }}"
+                                    class="flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-200 px-4 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50">
+                                    <i class="h-4 w-4" data-lucide="scan-search" aria-hidden="true"></i>{{ __('Book an Inspection') }}
+                                </a>
+                            @endif
                             <a href="#share"
                                 class="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-indigo-500 hover:text-indigo-600">
                                 <i class="h-4 w-4" data-lucide="share-2" aria-hidden="true"></i>{{ __('Share Property') }}
@@ -775,6 +1141,33 @@
                                 <p class="text-xs text-slate-500">{{ $listing->agency ? __('Agency listing') : __('Direct owner') }}</p>
                             </div>
                         </div>
+
+                        @if ($sellerReputation && ! $listing->agency)
+                            <div class="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-3 text-center dark:bg-night-800">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white">
+                                        {{ $sellerReputation['rating'] > 0 ? number_format($sellerReputation['rating'], 1).' / 5' : __('—') }}
+                                    </p>
+                                    <p class="text-[10px] uppercase tracking-wide text-slate-400">{{ __('Rating') }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $sellerReputation['completed_deals_count'] }}</p>
+                                    <p class="text-[10px] uppercase tracking-wide text-slate-400">{{ __('Deals closed') }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white">
+                                        {{ $sellerReputation['response_time_avg_minutes'] !== null ? __('~:min min', ['min' => $sellerReputation['response_time_avg_minutes']]) : __('—') }}
+                                    </p>
+                                    <p class="text-[10px] uppercase tracking-wide text-slate-400">{{ __('Avg reply') }}</p>
+                                </div>
+                            </div>
+                            @if ($sellerReputation['offer_response_rate'] !== null)
+                                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                                    {{ __('Responds to :pct% of offers', ['pct' => round($sellerReputation['offer_response_rate'] * 100)]) }}
+                                    · {{ __(':count disclosures', ['count' => $sellerReputation['disclosure_count']]) }}
+                                </p>
+                            @endif
+                        @endif
 
                         @auth
                             <div x-data="{ contactTab: '{{ $listing->type === 'hotel' ? 'book' : 'message' }}' }" class="mt-5">

@@ -45,6 +45,10 @@ class SavedSearchController extends ApiController
             'name' => $request->input('name'),
             'criteria' => $request->input('criteria'),
             'alert_on' => $request->boolean('alert_on', false),
+            'is_mandate' => $request->boolean('is_mandate', false),
+            'min_discount_pct' => $request->input('min_discount_pct'),
+            'min_deal_score' => $request->input('min_deal_score'),
+            'frequency' => $request->input('frequency'),
         ]);
 
         return $this->created(new SavedSearchResource($search), 'Search saved.');
@@ -61,6 +65,10 @@ class SavedSearchController extends ApiController
             'name' => $request->input('name', $savedSearch->name),
             'criteria' => $request->input('criteria', $savedSearch->criteria),
             'alert_on' => $request->has('alert_on') ? $request->boolean('alert_on') : $savedSearch->alert_on,
+            'is_mandate' => $request->has('is_mandate') ? $request->boolean('is_mandate') : $savedSearch->is_mandate,
+            'min_discount_pct' => $request->input('min_discount_pct', $savedSearch->min_discount_pct),
+            'min_deal_score' => $request->input('min_deal_score', $savedSearch->min_deal_score),
+            'frequency' => $request->input('frequency', $savedSearch->frequency),
         ], fn ($v) => $v !== null));
 
         return $this->success(new SavedSearchResource($savedSearch->fresh()), 'Saved search updated.');

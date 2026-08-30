@@ -46,6 +46,23 @@ class UpdateListingRequest extends FormRequest
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'floor_plans' => ['sometimes', 'nullable', 'array', 'max:5'],
             'floor_plans.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+
+            // Seller intake (Market module) — all optional, seller-declared
+            'distress_reason_category' => ['sometimes', 'nullable', Rule::in(['divorce', 'relocation', 'debt', 'estate_probate', 'bank_repossession', 'urgent_cash_need', 'other'])],
+            'distress_reason_visibility' => ['sometimes', Rule::in(['public', 'disclosure_only', 'private'])],
+            'expected_closing_period' => ['sometimes', 'nullable', Rule::in(['flexible', '30_days', '60_days', '90_days', 'immediate'])],
+            'negotiation_flexibility' => ['sometimes', 'nullable', Rule::in(['firm', 'negotiable', 'highly_negotiable', 'make_an_offer'])],
+            'expected_market_value' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'inspection_access_enabled' => ['sometimes', 'boolean'],
+
+            // Seller identity — written to the User, not the listing (see controller)
+            'seller_type' => ['sometimes', 'nullable', Rule::in(['individual', 'company', 'estate', 'executor_administrator', 'bank_institution', 'agent', 'developer'])],
+            'company_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'poa_document' => ['sometimes', 'nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+
+            // Title / supporting documents — written to property_documents (see controller)
+            'title_documents' => ['sometimes', 'nullable', 'array', 'max:10'],
+            'title_documents.*' => ['file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
         ];
     }
 

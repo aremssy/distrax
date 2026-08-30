@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
@@ -20,6 +21,9 @@ use Illuminate\Support\Str;
     'total_floors', 'area_sqft', 'parking', 'furnished', 'allowed_for', 'utility_flags',
     'address', 'country_code', 'lat', 'lng', 'status', 'is_featured', 'is_verified',
     'last_freshness_check_at', 'needs_confirmation_at', 'published_at',
+    'distress_reason_category', 'distress_reason_visibility', 'expected_closing_period',
+    'negotiation_flexibility', 'expected_market_value', 'deal_score_cached', 'verification_case_id',
+    'inspection_access_enabled',
 ])]
 class PropertyListing extends Model
 {
@@ -72,6 +76,7 @@ class PropertyListing extends Model
             'last_freshness_check_at' => 'datetime',
             'needs_confirmation_at' => 'datetime',
             'published_at' => 'datetime',
+            'inspection_access_enabled' => 'boolean',
         ];
     }
 
@@ -90,6 +95,17 @@ class PropertyListing extends Model
     public function agency(): BelongsTo
     {
         return $this->belongsTo(Agency::class);
+    }
+
+    /** The current/active case, cached via verification_case_id. A listing may have older cases from prior re-reviews. */
+    public function verificationCase(): BelongsTo
+    {
+        return $this->belongsTo(VerificationCase::class);
+    }
+
+    public function verificationCases(): HasMany
+    {
+        return $this->hasMany(VerificationCase::class);
     }
 
     public function images(): HasMany
@@ -168,6 +184,72 @@ class PropertyListing extends Model
         return $this->morphMany(Report::class, 'reportable');
     }
 
+    public function disclosures(): HasMany
+    {
+        return $this->hasMany(Disclosure::class);
+    }
+
+    public function valuations(): HasMany
+    {
+        return $this->hasMany(Valuation::class);
+    }
+
+    public function dealScores(): HasMany
+    {
+        return $this->hasMany(DealScore::class);
+    }
+
+    public function riskAssessments(): HasMany
+    {
+        return $this->hasMany(RiskAssessment::class);
+    }
+
+    public function offers(): HasMany
+    {
+        return $this->hasMany(Offer::class);
+    }
+
+    public function deals(): HasMany
+    {
+        return $this->hasMany(Deal::class);
+    }
+
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(Inspection::class);
+    }
+
+    public function priceHistory(): HasMany
+    {
+        return $this->hasMany(PriceHistory::class)->orderBy('changed_at');
+    }
+
+    public function timelineEvents(): HasMany
+    {
+        return $this->hasMany(PropertyTimelineEvent::class)->orderBy('occurred_at');
+    }
+
+    /** Comparable properties from the listing's valuations (most recent set wins). */
+    public function comparableProperties(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            ComparableProperty::class,
+            Valuation::class,
+            'property_listing_id',
+            'valuation_id'
+        );
+    }
+
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(PropertyDocument::class, 'documentable');
+    }
+
+    public function titleDocuments(): MorphMany
+    {
+        return $this->morphMany(PropertyDocument::class, 'documentable')->where('type', 'title');
+    }
+
     // ── Scopes ───────────────────────────────────────────────────────────────
 
     /** Flag each listing with an `is_favorited` attribute for the viewing user, without N+1 queries. */
@@ -222,8 +304,42 @@ class PropertyListing extends Model
                 ->orWhere('address', 'like', "%{$search}%")
             );
         }
+        if ($verificationStatus = $request->string('verification_status')->value()) {
+            $query->verificationStatus($verificationStatus);
+        }
+        if ($dealTag = $request->string('deal_tag')->value()) {
+            $query->dealTag($dealTag);
+        }
 
         return $query;
+    }
+
+    /** Filter by the listing's current verification-case status (see VerificationCase). */
+    public function scopeVerificationStatus(Builder $query, string $status): Builder
+    {
+        return $query->whereHas('verificationCase', fn (Builder $q) => $q->where('status', $status));
+    }
+
+    /**
+     * Filter by a marketplace "deal type" tag derived from existing seller-intake fields.
+     * Tags requiring price history / condition data (price_reduced, renovation_opportunity,
+     * development_opportunity) are not implemented yet — see repo memory for why.
+     */
+    public function scopeDealTag(Builder $query, string $tag): Builder
+    {
+        return match ($tag) {
+            'urgent_sale' => $query->where(fn (Builder $q) => $q
+                ->where('distress_reason_category', 'urgent_cash_need')
+                ->orWhere('expected_closing_period', 'immediate')),
+            'below_market_value' => $query->whereNotNull('expected_market_value')
+                ->whereColumn('price', '<', 'expected_market_value'),
+            'bank_institutional_asset' => $query->whereHas('owner', fn (Builder $q) => $q->where('is_institutional', true)),
+            'estate_sale' => $query->where('distress_reason_category', 'estate_probate'),
+            // Never surface a distress reason set to private, even just as "has a reason".
+            'owner_distress' => $query->whereNotNull('distress_reason_category')
+                ->whereIn('distress_reason_visibility', ['public', 'disclosure_only']),
+            default => $query->whereRaw('1 = 0'),
+        };
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────

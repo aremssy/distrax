@@ -36,6 +36,7 @@ use App\Http\Controllers\Api\V1\Subscription\SubscriptionController;
 use App\Http\Controllers\Api\V1\Technician\MaintenanceController;
 use App\Http\Controllers\Api\V1\Technician\TechnicianBookingController;
 use App\Http\Controllers\Api\V1\Technician\TechnicianController;
+use App\Http\Controllers\Api\V1\Verification\VerificationController;
 use App\Http\Controllers\Api\V1\Visit\VisitController;
 use App\Http\Controllers\Api\V1\Wallet\WalletController;
 use App\Http\Controllers\Api\V1\Zone\ZoneController;
@@ -190,7 +191,11 @@ Route::prefix('v1')
         // ── Reviews (public read) ─────────────────────────────────────────────
         Route::get('reviews', [ReviewController::class, 'index'])
             ->name('api.v1.reviews.public.index');
-
+        // ── Verification passport (public ── QR scans and listing badges need no auth) ──
+        Route::get('verify/{reference}', [VerificationController::class, 'passport'])
+            ->name('api.v1.verify.passport');
+        Route::get('listings/{listing}/verification', [VerificationController::class, 'status'])
+            ->name('api.v1.listings.verification');
         // ── Compare (public — no auth needed to compare by IDs) ──────────────
         Route::prefix('compare')->name('api.v1.compare.')->group(function () {
             Route::get('/', [CompareController::class, 'show'])->name('show');

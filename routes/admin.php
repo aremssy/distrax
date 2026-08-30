@@ -39,6 +39,9 @@ use App\Http\Controllers\Admin\ProjectCategoryController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ReferralRuleController;
 use App\Http\Controllers\Admin\ReviewModerationController;
+use App\Http\Controllers\Admin\DealController;
+use App\Http\Controllers\Admin\LegalMatterController;
+use App\Http\Controllers\Admin\VerificationCaseController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SeoMetaController;
 use App\Http\Controllers\Admin\SettingController;
@@ -348,6 +351,30 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('reviews')->name('reviews.')->middleware('permission:reviews.view')->group(function () {
             Route::get('/', [ReviewModerationController::class, 'index'])->name('index');
             Route::patch('/{review}/moderate', [ReviewModerationController::class, 'moderate'])->middleware('permission:reviews.edit')->name('moderate');
+        });
+
+        Route::prefix('verification-cases')->name('verification-cases.')->middleware('permission:verification_cases.view')->group(function () {
+            Route::get('/', [VerificationCaseController::class, 'index'])->name('index');
+            Route::get('/{case}', [VerificationCaseController::class, 'show'])->name('show');
+            Route::patch('/{case}/assign', [VerificationCaseController::class, 'assign'])->middleware('permission:verification_cases.assign')->name('assign');
+            Route::patch('/{case}/tasks/{task}', [VerificationCaseController::class, 'updateTask'])->middleware('permission:verification_tasks.update')->scopeBindings()->name('tasks.update');
+            Route::post('/{case}/tasks/{task}/evidence', [VerificationCaseController::class, 'uploadEvidence'])->middleware('permission:verification_tasks.update')->scopeBindings()->name('tasks.evidence');
+            Route::get('/evidence/{evidence}/file', [VerificationCaseController::class, 'evidenceFile'])->name('evidence.file');
+        });
+
+        // ── Deals & Transactions ───────────────────────────────────────────────
+        Route::prefix('deals')->name('deals.')->middleware('permission:deals.view')->group(function () {
+            Route::get('/', [DealController::class, 'index'])->name('index');
+            Route::get('/{deal}', [DealController::class, 'show'])->name('show');
+            Route::patch('/{deal}/advance', [DealController::class, 'advance'])->middleware('permission:deals.advance')->name('advance');
+            Route::patch('/{deal}/cancel', [DealController::class, 'cancel'])->middleware('permission:deals.cancel')->name('cancel');
+        });
+
+        // ── Legal Matters ──────────────────────────────────────────────────────
+        Route::prefix('legal-matters')->name('legal-matters.')->middleware('permission:legal_matters.view')->group(function () {
+            Route::get('/', [LegalMatterController::class, 'index'])->name('index');
+            Route::get('/{legalMatter}', [LegalMatterController::class, 'show'])->name('show');
+            Route::patch('/{legalMatter}', [LegalMatterController::class, 'update'])->middleware('permission:legal_matters.edit')->name('update');
         });
 
         // ── CMS Pages ────────────────────────────────────────────────────────────

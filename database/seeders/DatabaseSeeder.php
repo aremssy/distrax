@@ -37,6 +37,9 @@ class DatabaseSeeder extends Seeder
             RentManagementSeeder::class,
             // A minimal global demo: famous-city listings, each in its local currency.
             GlobalShowcaseSeeder::class,
+            // Consolidated real-estate demo: verification cases, scores, deal scores,
+            // risk, disclosures, comparables, offers, inspections and deals at every stage.
+            DistraxDemoSeeder::class,
         ]));
     }
 }

@@ -17,7 +17,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'phone', 'role_id', 'verification_status', 'verification_document_path', 'verification_reviewed_by', 'verification_note', 'verification_reviewed_at', 'language', 'currency', 'country_code', 'timezone', 'avatar', 'is_blocked', 'social_provider', 'social_id', 'last_active_at', 'phone_visibility', 'deletion_requested_at'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'role_id', 'verification_status', 'verification_document_path', 'verification_reviewed_by', 'verification_note', 'verification_reviewed_at', 'language', 'currency', 'country_code', 'timezone', 'avatar', 'is_blocked', 'social_provider', 'social_id', 'last_active_at', 'phone_visibility', 'deletion_requested_at', 'buying_for', 'is_institutional', 'rating', 'response_time_avg_minutes', 'completed_deals_count', 'seller_type', 'company_name', 'poa_document_path'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -33,6 +33,7 @@ class User extends Authenticatable
             'deletion_requested_at' => 'datetime',
             'password' => 'hashed',
             'is_blocked' => 'boolean',
+            'is_institutional' => 'boolean',
         ];
     }
 
@@ -129,5 +130,45 @@ class User extends Authenticatable
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class, 'admin_id');
+    }
+
+    public function verificationCasesAssigned(): HasMany
+    {
+        return $this->hasMany(VerificationCase::class, 'assigned_officer_id');
+    }
+
+    public function verificationTasksAssigned(): HasMany
+    {
+        return $this->hasMany(VerificationTask::class, 'assigned_to');
+    }
+
+    public function offersMade(): HasMany
+    {
+        return $this->hasMany(Offer::class, 'buyer_id');
+    }
+
+    public function dealsAsBuyer(): HasMany
+    {
+        return $this->hasMany(Deal::class, 'buyer_id');
+    }
+
+    public function dealsAsSeller(): HasMany
+    {
+        return $this->hasMany(Deal::class, 'seller_id');
+    }
+
+    public function institutionalAccount(): HasOne
+    {
+        return $this->hasOne(InstitutionalAccount::class, 'user_id');
+    }
+
+    public function investmentCalculators(): HasMany
+    {
+        return $this->hasMany(InvestmentCalculator::class);
+    }
+
+    public function askDistraxQueries(): HasMany
+    {
+        return $this->hasMany(AskDistraxQuery::class);
     }
 }

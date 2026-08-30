@@ -29,7 +29,9 @@ class AccountController extends Controller
 
     public function update(UpdateProfileRequest $request): RedirectResponse
     {
-        $request->user()->update($request->validated());
+        $data = $request->validated();
+        $data['is_institutional'] = (bool) $request->boolean('is_institutional');
+        $request->user()->update($data);
 
         return back()->with('success', 'Profile updated.');
     }

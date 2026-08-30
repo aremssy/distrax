@@ -48,7 +48,20 @@ class VerifiedReviewGuard
                     ->where('status', 'completed')
                     ->exists();
 
-            return $isTenantReviewingOwner || $isOwnerReviewingTenant || $isTechnicianReviewingCustomer;
+            // Case D: reviewer is a buyer in a completed real-estate transaction against this seller
+            $isBuyerReviewingSeller = Deal::where('seller_id', $reviewable->id)
+                ->where('buyer_id', $user->id)
+                ->where('stage', 'completed')
+                ->exists();
+
+            // Case E: reviewer is a seller in a completed real-estate transaction against this buyer
+            $isSellerReviewingBuyer = Deal::where('seller_id', $user->id)
+                ->where('buyer_id', $reviewable->id)
+                ->where('stage', 'completed')
+                ->exists();
+
+            return $isTenantReviewingOwner || $isOwnerReviewingTenant || $isTechnicianReviewingCustomer
+                || $isBuyerReviewingSeller || $isSellerReviewingBuyer;
         }
 
         return false;

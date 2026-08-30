@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['reviewer_id', 'reviewable_type', 'reviewable_id', 'rating', 'body', 'is_verified', 'is_visible', 'moderated_by', 'moderation_note', 'moderated_at', 'owner_reply'])]
+#[Fillable(['reviewer_id', 'reviewable_type', 'reviewable_id', 'deal_id', 'rating', 'body', 'is_verified', 'is_visible', 'moderated_by', 'moderation_note', 'moderated_at', 'owner_reply'])]
 class Review extends Model
 {
     use HasFactory, SoftDeletes;
@@ -37,5 +37,11 @@ class Review extends Model
     public function moderator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'moderated_by');
+    }
+
+    /** The completed transaction this review is tied to, when reviewing a deal counterparty. */
+    public function deal(): BelongsTo
+    {
+        return $this->belongsTo(Deal::class);
     }
 }

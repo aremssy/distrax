@@ -108,6 +108,41 @@ class ListingDetailResource extends JsonResource
             'reviews_count' => $this->when(isset($this->reviews_count), fn () => (int) $this->reviews_count),
             'favorites_count' => $this->when(isset($this->favorites_count), fn () => (int) $this->favorites_count),
 
+            // Distrax Verify (module 3.1-3.3)
+            'verification_status' => $this->relationLoaded('verificationCase') ? ($this->verificationCase?->status ?? 'in_progress') : 'in_progress',
+
+            // Seller intake (Market module) \u2014 seller-declared, not gated
+            'expected_market_value' => $this->expected_market_value !== null ? (float) $this->expected_market_value : null,
+            'negotiation_flexibility' => $this->negotiation_flexibility,
+            'expected_closing_period' => $this->expected_closing_period,
+            'inspection_access_enabled' => $this->inspection_access_enabled,
+
+            // Sale reason \u2014 gated by the seller's own visibility choice, never leaked when private.
+            // "disclosure_only" requires at least an authenticated buyer; a guest sees neither category nor reason.
+            'distress_reason_category' => match ($this->distress_reason_visibility) {
+                'public' => $this->distress_reason_category,
+                'disclosure_only' => $request->user('sanctum') ? $this->distress_reason_category : null,
+                default => null,
+            },
+
+            'disclosures' => $this->whenLoaded('disclosures', fn () => $this->disclosures->map(fn ($d) => [
+                'id' => $d->id,
+                'category' => $d->category,
+                'description' => $d->description,
+                'created_at' => $d->created_at->toIso8601String(),
+            ])),
+
+            // Document vault \u2014 metadata only for the owner; never exposed to anyone else on this endpoint.
+            'documents' => $this->when(
+                $request->user('sanctum')?->id === $this->owner_id,
+                fn () => $this->whenLoaded('documents', fn () => $this->documents->map(fn ($doc) => [
+                    'id' => $doc->id,
+                    'type' => $doc->type,
+                    'is_verified' => $doc->is_verified,
+                    'created_at' => $doc->created_at->toIso8601String(),
+                ])),
+            ),
+
             // Timestamps
             'needs_confirmation_at' => $this->needs_confirmation_at?->toIso8601String(),
             'last_freshness_check_at' => $this->last_freshness_check_at?->toIso8601String(),
