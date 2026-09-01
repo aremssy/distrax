@@ -119,7 +119,7 @@
                 </a>
             </div>
 
-            <div class="grid gap-8 lg:grid-cols-[minmax(0,1.9fr)_minmax(320px,1fr)] lg:items-start">
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.9fr)_minmax(320px,1fr)] lg:items-start">
                 {{-- ── Left column ─────────────────────────────────────────────── --}}
                 <div class="space-y-6">
                     <section aria-label="Property gallery">
