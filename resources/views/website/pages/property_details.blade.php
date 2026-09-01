@@ -183,18 +183,28 @@
                         @endif
                     </section>
 
-                    {{-- Title, purpose and address --}}
-                    <header class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                    {{-- Title, purpose, price and address --}}
+                    <header class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-indigo-600">
                                 {{ $purposeLabels[$listing->type] ?? ucfirst($listing->type) }}
                             </span>
                             <x-verification-badge :status="$listing->verificationCase?->status ?? 'in_progress'" />
                         </div>
-                        <h1 class="mt-3 text-2xl font-bold leading-snug tracking-tight text-slate-950">{{ $listing->title }}</h1>
+
+                        <p class="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1" aria-label="Property price">
+                            <span class="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
+                                {{ number_format($listing->price) }}<span class="ms-2 text-2xl font-bold text-indigo-600 sm:text-3xl">{{ $listing->currency_code }}</span>
+                            </span>
+                            @if ($priceSuffix)
+                                <span class="text-sm font-medium text-slate-500">{{ $priceSuffix }}</span>
+                            @endif
+                        </p>
+
+                        <h1 class="mt-2 text-xl font-bold leading-snug tracking-tight text-slate-950 sm:text-2xl">{{ $listing->title }}</h1>
                         <p class="mt-2 flex items-center gap-1.5 text-sm text-slate-600">
                             <i class="h-4 w-4 shrink-0 text-indigo-500" data-lucide="map-pin" aria-hidden="true"></i>
-                            {{ $listing->address ?? $listing->zone?->name }}
+                            <span class="line-clamp-2">{{ $listing->address ?? $listing->zone?->name }}</span>
                         </p>
                     </header>
 

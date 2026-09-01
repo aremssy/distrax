@@ -184,7 +184,7 @@
     <header class="sticky top-0 z-50 bg-white shadow-sm" data-purpose="main-header">
         <nav class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-3">
             <a href="{{ route('home') }}" aria-label="Rentdo home" class="shrink-0">
-                <x-application-logo class="h-8 w-auto md:h-10" />
+                <x-application-logo class="h-auto w-auto max-h-8 max-w-full md:max-h-10 md:max-w-[220px]" />
             </a>
             <ul class="hidden xl:flex items-center gap-7 2xl:gap-8 text-[15px] font-medium text-slate-600">
                 <li><a class="text-indigo-500" href="{{ url('/') }}">Home</a></li>

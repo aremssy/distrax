@@ -21,9 +21,9 @@
     <div class="relative aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
         <img class="h-full w-full object-cover transition duration-500 group-hover:scale-105" src="{{ $coverUrl }}"
             alt="{{ $listing->title }}" loading="lazy" width="640" height="480">
-        <div class="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-3">
+        <div class="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-1.5 p-2.5 sm:gap-2 sm:p-3">
             <div class="flex min-w-0 flex-wrap items-center gap-1.5">
-                <span class="rounded-full bg-slate-950/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white backdrop-blur">
+                <span class="rounded-full bg-slate-950/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur sm:px-2.5 sm:text-[11px]">
                     {{ $listing->type === 'sale' ? 'For sale' : ucfirst($listing->type) }}
                 </span>
                 @if ($listing->relationLoaded('verificationCase') ? $listing->verificationCase : $listing->is_verified)
