@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PriceHistory extends Model
 {
     use HasFactory;
+
+    protected $table = 'price_history';
+
     protected function casts(): array
     {
         return [
