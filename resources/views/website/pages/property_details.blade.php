@@ -347,7 +347,7 @@
                             @if ($marketValue)
                                 <div class="rounded-xl bg-slate-50 px-4 py-3">
                                     <p class="text-xs text-slate-500">{{ __('Estimated market value') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></p>
-                                    <p class="text-lg font-bold text-slate-950">{{ moneyFrom($marketValue, $valuation?->currency_code ?? $listing->currency_code) }}</p>
+                                    <p class="text-lg font-bold text-slate-950">{{ money($marketValue, $valuation?->currency_code ?? $listing->currency_code) }}</p>
                                 </div>
                             @endif
                             @if ($discountPct !== null)
@@ -410,8 +410,8 @@
                                 <dd class="mt-1 font-bold text-slate-950">{{ moneyFrom($listing->price, $listing->currency_code) }}</dd>
                             </div>
                             <div class="rounded-xl bg-slate-50 px-4 py-3">
-                                <dt class="text-xs text-slate-500">{{ __('Est. market value') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></dt>
-                                <dd class="mt-1 font-bold text-slate-950">{{ $marketValue ? moneyFrom($marketValue, $valuation?->currency_code ?? $listing->currency_code) : __('Not available') }}</dd>
+                                <dt class="text-xs text-slate-500">{{ __('Estimated market value') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></dt>
+                                <dd class="mt-1 font-bold text-slate-950">{{ $marketValue ? money($marketValue, $valuation?->currency_code ?? $listing->currency_code) : __('Not available') }}</dd>
                             </div>
                             <div class="rounded-xl bg-slate-50 px-4 py-3">
                                 <dt class="text-xs text-slate-500">{{ __('Price per m²') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></dt>
