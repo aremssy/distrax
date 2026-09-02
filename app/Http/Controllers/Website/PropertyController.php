@@ -144,7 +144,11 @@ class PropertyController extends Controller
             return;
         }
 
-        app(\App\Services\IntelligenceService::class)->analyze($listing);
+        $currencyCode = session('currency_code')
+            ?? (auth()->check() ? auth()->user()->currency : null)
+            ?? $listing->currency_code;
+
+        app(\App\Services\IntelligenceService::class)->analyze($listing, $currencyCode);
         $listing->load([
             'dealScores' => fn ($query) => $query->latest('computed_at')->limit(1),
             'valuations' => fn ($query) => $query->latest('valued_at')->limit(1),

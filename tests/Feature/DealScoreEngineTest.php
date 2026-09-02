@@ -6,6 +6,7 @@ use App\Models\DealScore;
 use App\Models\PropertyListing;
 use App\Models\RiskAssessment;
 use App\Models\Valuation;
+use App\Services\CurrencyConverter;
 use App\Services\DealScoreService;
 use App\Services\DistanceService;
 use App\Services\ValuationService;
@@ -27,7 +28,10 @@ class DealScoreEngineTest extends TestCase
         $valuation = Mockery::mock(ValuationService::class);
         $valuation->shouldReceive('latestEstimatedValue')->andReturn($marketValue);
 
-        return new DealScoreService(new DistanceService(), $valuation);
+        $currencyConverter = Mockery::mock(CurrencyConverter::class);
+        $currencyConverter->shouldReceive('convert')->andReturnUsing(fn ($amount) => $amount);
+
+        return new DealScoreService(new DistanceService(), $valuation, $currencyConverter);
     }
 
     public function test_risk_penalty_prevents_discount_from_dominating(): void

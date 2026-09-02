@@ -57,17 +57,21 @@ class DealScoreService
     public function __construct(
         private DistanceService $distance,
         private ValuationService $valuations,
+        private CurrencyConverter $currencyConverter,
     ) {}
 
     /**
      * Compute and persist a Deal Score for a listing, then back-fill the cached column.
      * Optionally accepts already-computed supporting models to avoid re-querying.
+     * When $targetCurrency is provided, monetary comparisons are converted into that
+     * currency so the score reflects the viewer's selected currency.
      */
-    public function compute(PropertyListing $listing): DealScore
+    public function compute(PropertyListing $listing, ?string $targetCurrency = null): DealScore
     {
-        return DB::transaction(function () use ($listing): DealScore {
+        return DB::transaction(function () use ($listing, $targetCurrency): DealScore {
+            $targetCurrency ??= $listing->currency_code;
             $weights = $this->weights();
-            $components = $this->components($listing);
+            $components = $this->components($listing, $targetCurrency);
 
             $total = 0;
             foreach ($components as $key => $value) {
@@ -79,10 +83,11 @@ class DealScoreService
                 'property_listing_id' => $listing->id,
                 'score' => $total,
                 'breakdown' => [
-                    'version' => 3,
+                    'version' => 4,
                     'weights' => $weights,
                     ...$components,
                     'label' => self::labelFor($total),
+                    'currency' => $targetCurrency,
                 ],
                 'computed_at' => now(),
             ]);
@@ -135,10 +140,12 @@ class DealScoreService
      * All component sub-scores on a 0–100 scale. Higher is better; risk is a penalty
      * (a high risk detracts, i.e. the component approaches 0 when risk is high).
      */
-    public function components(PropertyListing $listing): array
+    public function components(PropertyListing $listing, ?string $targetCurrency = null): array
     {
+        $targetCurrency ??= $listing->currency_code;
+
         return [
-            'discount_component' => $this->discountComponent($listing),
+            'discount_component' => $this->discountComponent($listing, $targetCurrency),
             'verification_component' => $this->verificationComponent($listing),
             'location_component' => (int) setting('deal_score_location_default', 60),
             'condition_component' => (int) setting('deal_score_condition_default', 60),
@@ -151,7 +158,7 @@ class DealScoreService
         ];
     }
 
-    private function discountComponent(PropertyListing $listing): int
+    private function discountComponent(PropertyListing $listing, string $targetCurrency): int
     {
         $market = $this->valuations->latestEstimatedValue($listing);
 
@@ -159,7 +166,17 @@ class DealScoreService
             return 50;
         }
 
-        $discountPct = (($market - $listing->price) / $market) * 100;
+        $valuationCurrency = $listing->valuations()->latest('valued_at')->first()?->currency_code
+            ?? $listing->currency_code;
+
+        $marketInTarget = $this->currencyConverter->convert($market, $valuationCurrency, $targetCurrency);
+        $priceInTarget = $this->currencyConverter->convert($listing->price, $listing->currency_code, $targetCurrency);
+
+        if ($marketInTarget <= 0 || $priceInTarget <= 0) {
+            return 50;
+        }
+
+        $discountPct = (($marketInTarget - $priceInTarget) / $marketInTarget) * 100;
 
         return max(0, min(100, (int) round(50 + $discountPct * 2)));
     }

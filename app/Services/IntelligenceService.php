@@ -20,22 +20,22 @@ class IntelligenceService
     ) {}
 
     /** Fresh valuation + risk snapshot + deal score for a listing. */
-    public function analyze(PropertyListing $listing): void
+    public function analyze(PropertyListing $listing, ?string $currencyCode = null): void
     {
         $this->valuations->valuate($listing);
         $this->risks->assess($listing);
-        $this->scores->compute($listing);
+        $this->scores->compute($listing, $currencyCode);
     }
 
     /** Recompute just the Deal Score (price/freshness/urgency changes). */
-    public function recomputeScore(PropertyListing $listing): void
+    public function recomputeScore(PropertyListing $listing, ?string $currencyCode = null): void
     {
-        $this->scores->compute($listing);
+        $this->scores->compute($listing, $currencyCode);
     }
 
     /** Recompute everything after a relevant change (verification, price, disclosure). */
-    public function recompute(PropertyListing $listing): void
+    public function recompute(PropertyListing $listing, ?string $currencyCode = null): void
     {
-        $this->analyze($listing);
+        $this->analyze($listing, $currencyCode);
     }
 }
