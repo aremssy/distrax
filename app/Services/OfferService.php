@@ -40,7 +40,7 @@ class OfferService
                 'property_listing_id' => $listing->id,
                 'buyer_id' => $buyer->id,
                 'amount' => (int) $attributes['amount'],
-                'currency_code' => $attributes['currency_code'] ?? config('app.currency', 'USD'),
+                'currency_code' => $listing->currency_code,
                 'terms' => $attributes['terms'] ?? null,
                 'expires_at' => $attributes['expires_at'] ?? now()->addDays(
                     (int) config('offer.default_expiry_days', 3),

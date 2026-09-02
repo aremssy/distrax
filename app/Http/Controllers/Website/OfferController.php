@@ -43,7 +43,6 @@ class OfferController extends Controller
     {
         $data = $request->validate([
             'amount' => ['required', 'integer', 'min:1'],
-            'currency_code' => ['nullable', 'string', 'size:3'],
             'terms' => ['nullable', 'string', 'max:2000'],
             'message' => ['nullable', 'string', 'max:2000'],
         ]);

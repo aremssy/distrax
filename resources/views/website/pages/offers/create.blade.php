@@ -47,8 +47,9 @@
                         </div>
                         <div>
                             <label for="currency_code" class="block text-sm font-semibold text-slate-800">{{ __('Currency') }}</label>
-                            <input id="currency_code" name="currency_code" type="text" maxlength="3" value="{{ old('currency_code', $listing->currency_code ?? '') }}"
-                                class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 uppercase outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10">
+                            <input id="currency_code" name="currency_code" type="text" maxlength="3" readonly value="{{ $listing->currency_code ?? '' }}"
+                                class="mt-2 w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-100 px-3.5 py-2.5 text-sm text-slate-800 uppercase outline-none">
+                            <p class="mt-1.5 text-xs text-slate-500">{{ __('Offers can only be made in the property listing currency.') }}</p>
                         </div>
                     </div>
 
