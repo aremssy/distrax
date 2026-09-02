@@ -342,12 +342,12 @@
                         <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <div class="rounded-xl bg-slate-50 px-4 py-3">
                                 <p class="text-xs text-slate-500">{{ __('Asking price') }}</p>
-                                <p class="text-lg font-bold text-slate-950">{{ number_format($listing->price) }} {{ $listing->currency_code }}</p>
+                                <p class="text-lg font-bold text-slate-950">{{ moneyFrom($listing->price, $listing->currency_code) }}</p>
                             </div>
                             @if ($marketValue)
                                 <div class="rounded-xl bg-slate-50 px-4 py-3">
                                     <p class="text-xs text-slate-500">{{ __('Estimated market value') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></p>
-                                    <p class="text-lg font-bold text-slate-950">{{ number_format($marketValue) }} {{ $listing->currency_code }}</p>
+                                    <p class="text-lg font-bold text-slate-950">{{ moneyFrom($marketValue, $valuation?->currency_code ?? $listing->currency_code) }}</p>
                                 </div>
                             @endif
                             @if ($discountPct !== null)

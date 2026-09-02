@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api\V1\Listing;
 
 use App\Enums\PropertyType;
+use App\Models\Currency;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -24,6 +25,7 @@ class UpdateListingRequest extends FormRequest
             // Numeric upper bounds mirror the property_listings column types so a
             // valid form never overflows the database (bigint / int / smallint / tinyint).
             'price' => ['sometimes', 'integer', 'min:0', 'max:999999999999'],
+            'currency_code' => ['sometimes', 'nullable', 'string', 'size:3', Rule::in(Currency::activeCached()->pluck('code')->all())],
             'service_charge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:999999999999'],
             'advance_months' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:24'],
             'is_negotiable' => ['sometimes', 'boolean'],

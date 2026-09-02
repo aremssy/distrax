@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use App\Enums\PropertyType;
 use App\Models\CustomField;
+use App\Models\Currency;
 use App\Models\PropertyVideo;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -33,6 +34,7 @@ class StoreListingRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'language_tag' => ['required', 'string', 'max:10'],
             'price' => ['required', 'integer', 'min:0'],
+            'currency_code' => ['sometimes', 'nullable', 'string', 'size:3', Rule::in(Currency::activeCached()->pluck('code')->all())],
             'service_charge' => ['nullable', 'integer', 'min:0'],
             'advance_months' => ['nullable', 'integer', 'min:0', 'max:120'],
             'is_negotiable' => ['nullable', 'boolean'],

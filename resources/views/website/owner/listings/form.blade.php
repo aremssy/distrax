@@ -243,6 +243,18 @@
                                 value="{{ old('price', $listing?->price) }}" placeholder="{{ __('Enter price') }}" required>
                         </div>
 
+                        <div>
+                            <label class="{{ $labelClass }}" for="currency_code">{{ __('Currency') }}</label>
+                            <select id="currency_code" class="mt-2 {{ $inputClass }}" name="currency_code">
+                                @foreach ($currencies ?? [] as $currency)
+                                    <option value="{{ $currency->code }}"
+                                        @selected(old('currency_code', $listing?->currency_code ?? 'NGN') === $currency->code)>
+                                        {{ $currency->name }} ({{ $currency->symbol }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         {{-- min/max mirror the DB column limits so the browser blocks out-of-range values before submit. --}}
                         @foreach ([
                             ['bedrooms', __('Bedrooms'), __('e.g. 3'), 0, 255],

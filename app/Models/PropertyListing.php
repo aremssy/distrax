@@ -36,10 +36,13 @@ class PropertyListing extends Model
                 $listing->slug = self::uniqueSlug(Str::slug($listing->title) ?: 'listing');
             }
 
-            // A listing is always priced in a concrete currency; fall back to the
-            // platform base so legacy/admin create paths never persist a null.
+            // A listing is always priced in a concrete currency; fall back to Naira
+            // (the marketplace default for new listings) so seller-entered prices are
+            // never left un-denominated. If NGN isn't active, fall back to the base.
             if (empty($listing->currency_code)) {
-                $listing->currency_code = Currency::defaultActive()?->code ?? 'USD';
+                $listing->currency_code = Currency::findActiveByCode('NGN')?->code
+                    ?? Currency::defaultActive()?->code
+                    ?? 'USD';
             }
         });
 

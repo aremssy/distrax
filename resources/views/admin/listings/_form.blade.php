@@ -44,6 +44,15 @@
             <x-admin.form.input name="language_tag" label="Language" :value="old('language_tag', $listing->language_tag ?: setting('default_language', 'en'))" required />
 
             <x-admin.form.input name="price" label="Price" type="number" min="0" :value="old('price', $listing->price)" required />
+
+            <x-admin.form.select name="currency_code" label="Currency">
+                @foreach($currencies ?? [] as $currency)
+                    <option value="{{ $currency->code }}" @selected(old('currency_code', $listing->currency_code ?: 'NGN') === $currency->code)>
+                        {{ $currency->name }} ({{ $currency->symbol }})
+                    </option>
+                @endforeach
+            </x-admin.form.select>
+
             <x-admin.form.input name="service_charge" label="Service Charge" type="number" min="0" :value="old('service_charge', $listing->service_charge)" />
             <x-admin.form.input name="advance_months" label="Advance Months" type="number" min="0" :value="old('advance_months', $listing->advance_months)" />
 

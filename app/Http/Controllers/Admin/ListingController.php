@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\BulkTrashListingsRequest;
 use App\Http\Requests\Admin\StoreListingRequest;
 use App\Http\Requests\Admin\UpdateListingRequest;
 use App\Models\CustomField;
+use App\Models\Currency;
 use App\Models\PropertyImage;
 use App\Models\PropertyListing;
 use App\Models\PropertyVideo;
@@ -300,6 +301,7 @@ class ListingController extends Controller
             'customFieldValues' => $listing->exists
                 ? $listing->customFieldValues->pluck('value', 'custom_field_id')->all()
                 : [],
+            'currencies' => Currency::activeCached(),
         ];
     }
 

@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\Listing\StoreListingRequest;
 use App\Http\Requests\Api\V1\Listing\UpdateListingRequest;
 use App\Http\Requests\Api\V1\Listing\UpdateListingStatusRequest;
 use App\Http\Requests\Api\V1\Listing\UploadMediaRequest;
+use App\Models\Currency;
 use App\Models\CustomField;
 use App\Models\ListingPackage;
 use App\Models\PropertyImage;
@@ -73,6 +74,7 @@ class OwnerListingController extends Controller
             'zones' => $this->zones(),
             'amenities' => config('amenities'),
             'customFields' => $this->customFields(),
+            'currencies' => Currency::activeCached(),
         ]);
     }
 
@@ -116,6 +118,7 @@ class OwnerListingController extends Controller
             'zones' => $this->zones(),
             'amenities' => config('amenities'),
             'customFields' => $this->customFields($listing->type),
+            'currencies' => Currency::activeCached(),
         ]);
     }
 
