@@ -407,15 +407,15 @@
                         <dl class="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
                             <div class="rounded-xl bg-slate-50 px-4 py-3">
                                 <dt class="text-xs text-slate-500">{{ __('Asking price') }}</dt>
-                                <dd class="mt-1 font-bold text-slate-950">{{ number_format($listing->price) }}</dd>
+                                <dd class="mt-1 font-bold text-slate-950">{{ moneyFrom($listing->price, $listing->currency_code) }}</dd>
                             </div>
                             <div class="rounded-xl bg-slate-50 px-4 py-3">
                                 <dt class="text-xs text-slate-500">{{ __('Est. market value') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></dt>
-                                <dd class="mt-1 font-bold text-slate-950">{{ $marketValue ? number_format($marketValue) : __('Not available') }}</dd>
+                                <dd class="mt-1 font-bold text-slate-950">{{ $marketValue ? moneyFrom($marketValue, $valuation?->currency_code ?? $listing->currency_code) : __('Not available') }}</dd>
                             </div>
                             <div class="rounded-xl bg-slate-50 px-4 py-3">
                                 <dt class="text-xs text-slate-500">{{ __('Price per m²') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></dt>
-                                <dd class="mt-1 font-bold text-slate-950">{{ $pricePerSqm ? number_format($pricePerSqm) : __('Not available') }}</dd>
+                                <dd class="mt-1 font-bold text-slate-950">{{ $pricePerSqm ? moneyFrom($pricePerSqm, $listing->currency_code) : __('Not available') }}</dd>
                             </div>
                             <div class="rounded-xl bg-slate-50 px-4 py-3">
                                 <dt class="text-xs text-slate-500">{{ __('Discount / premium') }}</dt>
@@ -425,7 +425,7 @@
                             </div>
                             <div class="rounded-xl bg-slate-50 px-4 py-3">
                                 <dt class="text-xs text-slate-500">{{ __('Est. acquisition cost') }} <span class="text-[10px] uppercase text-indigo-500">Estimate</span></dt>
-                                <dd class="mt-1 font-bold text-slate-950">{{ number_format($listing->price) }}</dd>
+                                <dd class="mt-1 font-bold text-slate-950">{{ moneyFrom($listing->price, $listing->currency_code) }}</dd>
                             </div>
                             <div class="rounded-xl bg-slate-50 px-4 py-3">
                                 <dt class="text-xs text-slate-500">{{ __('Recent price reduction') }}</dt>
@@ -495,7 +495,7 @@
                                 @foreach ($priceHistory->reverse() as $entry)
                                     <li class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
                                         <span>{{ $entry->changed_at->format('M Y') }}</span>
-                                        <span><span class="line-through text-slate-400">{{ number_format($entry->old_price) }}</span> → <span class="font-semibold text-slate-800">{{ number_format($entry->new_price) }}</span></span>
+                                        <span><span class="line-through text-slate-400">{{ moneyFrom($entry->old_price, $entry->currency_code ?? $listing->currency_code) }}</span> → <span class="font-semibold text-slate-800">{{ moneyFrom($entry->new_price, $entry->currency_code ?? $listing->currency_code) }}</span></span>
                                     </li>
                                 @endforeach
                             </ul>
@@ -569,7 +569,7 @@
                                 <a href="{{ $comparable->listing ? route('properties.show', $comparable->listing) : '#' }}"
                                     class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm transition hover:bg-slate-50">
                                     <div>
-                                        <p class="font-semibold text-slate-800">{{ number_format($comparable->sale_price) }}</p>
+                                        <p class="font-semibold text-slate-800">{{ moneyFrom($comparable->sale_price, $listing->currency_code) }}</p>
                                         @if ($comparable->distance_km !== null)
                                             <p class="text-xs text-slate-500">{{ number_format($comparable->distance_km, 1) }} km away</p>
                                         @endif

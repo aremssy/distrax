@@ -105,7 +105,7 @@
                                             @if ($listing->status === 'active') bg-emerald-100 text-emerald-700
                                             @else bg-slate-100 text-slate-600 @endif">{{ ucfirst($listing->status) }}</span>
                                     </td>
-                                    <td class="px-5 py-3.5 text-right font-semibold text-slate-800">{{ money($listing->price, $listing->currency_code) }}</td>
+                                    <td class="px-5 py-3.5 text-right font-semibold text-slate-800">{{ moneyFrom($listing->price, $listing->currency_code) }}</td>
                                 </tr>
                             @empty
                                 <tr>

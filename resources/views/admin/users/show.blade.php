@@ -146,7 +146,7 @@
                 @if($user->wallet)
                     <div class="text-center">
                         <p class="text-2xl font-bold text-slate-800 dark:text-slate-100 font-mono">
-                            {{ number_format($user->wallet->balance) }}
+                            {{ money($user->wallet->balance, $user->wallet->currency) }}
                         </p>
                         <p class="text-xs text-slate-500">{{ strtoupper($user->wallet->currency ?? 'USD') }}</p>
                     </div>

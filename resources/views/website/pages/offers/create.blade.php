@@ -22,7 +22,7 @@
                     <div class="min-w-0">
                         <p class="truncate text-sm font-bold text-slate-900">{{ $listing->title }}</p>
                         <p class="text-sm text-slate-500">{{ $listing->address }}</p>
-                        <p class="mt-0.5 text-sm font-semibold text-emerald-700">{{ money($listing->price, $listing->currency_code) }}</p>
+                        <p class="mt-0.5 text-sm font-semibold text-emerald-700">{{ moneyFrom($listing->price, $listing->currency_code) }}</p>
                     </div>
                 </div>
 

@@ -103,12 +103,12 @@
                     </div>
                     <div>
                         <dt class="text-[11px] font-semibold uppercase tracking-widest text-slate-400 dark:text-night-500 mb-0.5">Price</dt>
-                        <dd class="font-semibold text-slate-800 dark:text-slate-100 font-mono">{{ money($listing->price) }}</dd>
+                        <dd class="font-semibold text-slate-800 dark:text-slate-100 font-mono">{{ moneyFrom($listing->price, $listing->currency_code) }}</dd>
                     </div>
                     @if($listing->service_charge)
                         <div>
                             <dt class="text-[11px] font-semibold uppercase tracking-widest text-slate-400 dark:text-night-500 mb-0.5">Service Charge</dt>
-                            <dd class="font-mono text-slate-700 dark:text-slate-200">{{ money($listing->service_charge) }}</dd>
+                            <dd class="font-mono text-slate-700 dark:text-slate-200">{{ moneyFrom($listing->service_charge, $listing->currency_code) }}</dd>
                         </div>
                     @endif
                     <div>

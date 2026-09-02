@@ -327,7 +327,7 @@
                             </td>
 
                             <td class="whitespace-nowrap px-3 py-3.5">
-                                <span class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ money($listing->price) }}</span>
+                                <span class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ moneyFrom($listing->price, $listing->currency_code) }}</span>
                                 @if ($suffix)
                                     <span class="text-xs text-slate-400 dark:text-night-500">{{ $suffix }}</span>
                                 @endif
