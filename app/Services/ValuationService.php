@@ -15,7 +15,10 @@ use Illuminate\Support\Facades\DB;
  */
 class ValuationService
 {
-    public function __construct(private ComparableService $comparables) {}
+    public function __construct(
+        private ComparableService $comparables,
+        private CurrencyConverter $currencyConverter,
+    ) {}
 
     /** The most recent estimated market value for a listing, or null. */
     public function latestEstimatedValue(PropertyListing $listing): ?int
@@ -66,7 +69,7 @@ class ValuationService
     }
 
     /** Discount/premium percentage vs the latest automated valuation (null if none). */
-    public function discountPct(PropertyListing $listing, ?int $marketValue = null): ?float
+    public function discountPct(PropertyListing $listing, ?int $marketValue = null, ?string $toCurrency = null): ?float
     {
         $marketValue ??= $this->latestEstimatedValue($listing);
 
@@ -74,7 +77,20 @@ class ValuationService
             return null;
         }
 
-        return round((($marketValue - $listing->price) / $marketValue) * 100, 1);
+        $market = $marketValue;
+        $price = (float) $listing->price;
+
+        if ($toCurrency) {
+            $from = $listing->valuations()->latest('id')->value('currency_code') ?? $listing->currency_code;
+            $market = $this->currencyConverter->convert($market, $from, $toCurrency);
+            $price = $this->currencyConverter->convert($price, $listing->currency_code, $toCurrency);
+        }
+
+        if ($market <= 0) {
+            return null;
+        }
+
+        return round((($market - $price) / $market) * 100, 1);
     }
 
     private function deriveMarketValue(PropertyListing $listing, Collection $comps): int

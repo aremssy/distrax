@@ -116,7 +116,10 @@ class PropertyController extends Controller
         $dealScore = $listing->dealScores->first();
         $valuation = $listing->valuations->first();
         $marketValue = $valuation?->estimated_value;
-        $discountPct = app(ValuationService::class)->discountPct($listing, $marketValue);
+        $displayCurrency = session('currency_code')
+            ?? (auth()->check() ? auth()->user()->currency : null)
+            ?? $listing->currency_code;
+        $discountPct = app(ValuationService::class)->discountPct($listing, $marketValue, $displayCurrency);
         $riskAssessments = $listing->riskAssessments;
         $comparables = $listing->comparableProperties;
         $priceHistory = $listing->priceHistory;
